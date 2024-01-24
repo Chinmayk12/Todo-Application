@@ -32,7 +32,7 @@
         android:drawablePadding="8dp"
         android:drawableTint="#673AB7"
         android:gravity="center"
-        android:hint="Enter Login Email"
+        android:hint="Enter Email"
         android:inputType="textEmailAddress"
         android:textColorHint="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -54,7 +54,7 @@
         android:drawableTint="#673AB7"
         android:gravity="center"
         android:hint="Enter Password"
-        android:inputType="numberPassword"
+        android:inputType="textPassword"
         android:textColorHint="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -79,7 +79,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/signupbtn"
+        android:id="@+id/loginbtn"
         android:layout_width="358dp"
         android:layout_height="57dp"
         android:layout_marginTop="465dp"

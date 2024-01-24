@@ -17,7 +17,7 @@
         app:srcCompat="@drawable/right_corner1" />
 
     <Button
-        android:id="@+id/signupbtn"
+        android:id="@+id/loginbtn"
         android:layout_width="358dp"
         android:layout_height="57dp"
         android:layout_marginStart="30dp"
@@ -43,13 +43,13 @@
         android:drawableTint="#673AB7"
         android:gravity="center"
         android:hint="Enter Password"
-        android:inputType="numberPassword"
+        android:inputType="textPassword"
         android:textColor="@color/black"
         android:textColorHint="@color/black"
-        app:layout_constraintBottom_toTopOf="@+id/signupbtn"
+        app:layout_constraintBottom_toTopOf="@+id/loginbtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/email" />
+        app:layout_constraintTop_toBottomOf="@+id/signupemail" />
 
     <EditText
         android:id="@+id/loginemail"
@@ -67,7 +67,7 @@
         android:inputType="text"
         android:textColor="@color/black"
         android:textColorHint="@color/black"
-        app:layout_constraintBottom_toTopOf="@+id/email"
+        app:layout_constraintBottom_toTopOf="@+id/signupemail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clockimage"
@@ -118,7 +118,7 @@
         tools:ignore="DuplicateIds" />
 
     <EditText
-        android:id="@+id/email"
+        android:id="@+id/signupemail"
         android:layout_width="358dp"
         android:layout_height="57dp"
         android:layout_marginStart="27dp"
@@ -129,7 +129,7 @@
         android:ems="10"
         android:gravity="center"
         android:hint="Enter Email"
-        android:inputType="text"
+        android:inputType="textEmailAddress"
         android:textColor="@color/black"
         android:textColorHint="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/loginpassword"
@@ -146,8 +146,8 @@
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/signupbtn"
+        app:layout_constraintEnd_toEndOf="@+id/loginbtn"
         app:layout_constraintHorizontal_bias="0.484"
-        app:layout_constraintStart_toStartOf="@+id/signupbtn" />
+        app:layout_constraintStart_toStartOf="@+id/loginbtn" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
