@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".signup">
+
+    <ImageView
+        android:id="@+id/imageView5"
+        android:layout_width="221dp"
+        android:layout_height="229dp"
+        android:layout_marginStart="268dp"
+        android:layout_marginTop="584dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/right_corner1" />
+
+    <Button
+        android:id="@+id/signupbtn"
+        android:layout_width="358dp"
+        android:layout_height="57dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="23dp"
+        android:text="Signup"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/alreadylogin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loginpassword"
+        tools:ignore="MissingConstraints" />
+
+    <EditText
+        android:id="@+id/loginpassword"
+        android:layout_width="358dp"
+        android:layout_height="57dp"
+        android:layout_marginStart="27dp"
+        android:layout_marginEnd="26dp"
+        android:background="@drawable/rounded_edittext_background"
+        android:drawableStart="@drawable/baseline_lock_24"
+        android:drawablePadding="8dp"
+        android:drawableTint="#673AB7"
+        android:gravity="center"
+        android:hint="Enter Password"
+        android:inputType="numberPassword"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/signupbtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/email" />
+
+    <EditText
+        android:id="@+id/loginemail"
+        android:layout_width="358dp"
+        android:layout_height="57dp"
+        android:layout_marginStart="27dp"
+        android:layout_marginEnd="26dp"
+        android:background="@drawable/rounded_edittext_background"
+        android:drawableStart="@drawable/baseline_person_24"
+        android:drawablePadding="8dp"
+        android:drawableTint="#673AB7"
+        android:ems="10"
+        android:gravity="center"
+        android:hint="Enter Username"
+        android:inputType="text"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/email"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clockimage"
+        tools:ignore="MissingConstraints" />
+
+    <ImageView
+        android:id="@+id/clockimage"
+        android:layout_width="154dp"
+        android:layout_height="124dp"
+        android:layout_marginStart="128dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="129dp"
+        android:src="@drawable/clock_image1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signuphere" />
+
+    <TextView
+        android:id="@+id/signuphere"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="123dp"
+        android:layout_marginTop="61dp"
+        android:layout_marginEnd="100dp"
+        android:layout_marginBottom="623dp"
+        android:text="Signup Here"
+        android:textSize="35dp"
+        android:textStyle="italic|bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints" />
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="125dp"
+        android:layout_height="155dp"
+        android:layout_marginEnd="336dp"
+        android:layout_marginBottom="652dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.22"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.21"
+        app:srcCompat="@drawable/left_corner1"
+        tools:ignore="DuplicateIds" />
+
+    <EditText
+        android:id="@+id/email"
+        android:layout_width="358dp"
+        android:layout_height="57dp"
+        android:layout_marginStart="27dp"
+        android:layout_marginEnd="26dp"
+        android:background="@drawable/rounded_edittext_background"
+        android:drawableStart="@drawable/baseline_email_24"
+        android:drawableTint="#9C27B0"
+        android:ems="10"
+        android:gravity="center"
+        android:hint="Enter Email"
+        android:inputType="text"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/loginpassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loginemail" />
+
+    <TextView
+        android:id="@+id/alreadylogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="132dp"
+        android:text="Already a user? Login"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/signupbtn"
+        app:layout_constraintHorizontal_bias="0.484"
+        app:layout_constraintStart_toStartOf="@+id/signupbtn" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
