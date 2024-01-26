@@ -16,6 +16,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
 import com.google.android.gms.auth.api.identity.BeginSignInRequest;
 import com.google.android.gms.auth.api.identity.BeginSignInResult;
 import com.google.android.gms.auth.api.identity.Identity;
@@ -26,12 +32,16 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,11 +51,15 @@ public class login extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private BeginSignInRequest signInRequest;
     private SignInClient oneTapClient;
+    private CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
+
+        email = (EditText) findViewById(R.id.loginemail);
+        password = (EditText)findViewById(R.id.loginpassword);
 
         SharedPreferences sharedPreferences = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
         int flag =  sharedPreferences.getInt("flag", 0);
@@ -58,11 +72,9 @@ public class login extends AppCompatActivity {
             startHomeActivity();
         }
 
-        email = (EditText) findViewById(R.id.loginemail);
-        password = (EditText)findViewById(R.id.loginpassword);
     }
 
-    public void login(View view) {
+    public void emailLogin(View view) {
 
         String emailtxt = email.getText().toString();
         String passwordtxt = password.getText().toString();
@@ -129,8 +141,8 @@ public class login extends AppCompatActivity {
                     @Override
                     public void onSuccess(BeginSignInResult result) {
                         try {
-                            startIntentSenderForResult(
-                                    result.getPendingIntent().getIntentSender(), REQ_ONE_TAP,
+                            // Call TO onActivityResult()
+                            startIntentSenderForResult(result.getPendingIntent().getIntentSender(), REQ_ONE_TAP,
                                     null, 0, 0, 0);
                         } catch (IntentSender.SendIntentException e) {
                             Log.e("Error:", "Couldn't start One Tap UI: " + e.getLocalizedMessage());
@@ -147,49 +159,110 @@ public class login extends AppCompatActivity {
                 });
     }
     @Override
-        // Results for google SignIn
-        protected void onActivityResult (int requestCode, int resultCode, @Nullable Intent data){
-            super.onActivityResult(requestCode, resultCode, data);
+    // Results for google and FB SignIn
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-            switch (requestCode) {
-                case REQ_ONE_TAP:
-                    try {
-                        //If the result is successful,
-                        // it extracts the SignInCredential from the intent data and uses it to sign in with Firebase using the Google ID token.
-                        SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(data);
+        // For Google Sign In
+        if (requestCode == REQ_ONE_TAP) {
+            try {
+                SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(data);
 
-                        // Authenticate with Firebase using the Google ID token
-                        mAuth.signInWithCredential(GoogleAuthProvider.getCredential(credential.getGoogleIdToken(), null))
-                                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<AuthResult> task) {
-                                        if (task.isSuccessful()) {
-                                            String uid = mAuth.getCurrentUser().getUid();
+                mAuth.signInWithCredential(GoogleAuthProvider.getCredential(credential.getGoogleIdToken(), null))
+                        .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    // Getting Current Id of user
+                                    String uid = mAuth.getCurrentUser().getUid();
 
-                                            Map<String, String> userData = new HashMap<>();
-                                            //userData.put("username", usernametxt);
-                                            userData.put("email", mAuth.getCurrentUser().getEmail());
+                                    Map<String, String> userData = new HashMap<>();
+                                    //userData.put("username", usernametxt);
+                                    userData.put("email", mAuth.getCurrentUser().getEmail());
 
-                                            FirebaseDatabase db = FirebaseDatabase.getInstance();
-                                            DatabaseReference users = db.getReference("users");
+                                    FirebaseDatabase db = FirebaseDatabase.getInstance();
+                                    DatabaseReference users = db.getReference("users");
 
-                                            users.child(uid).setValue(userData);
+                                    users.child(uid).setValue(userData);
 
-                                            startHomeActivity();
-                                        } else {
-                                            Log.w("Google SignIn", "signInWithCredential:failure", task.getException());
-                                            Toast.makeText(getApplicationContext(), "Authentication Failed.", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
-
-                    } catch (ApiException e) {
-                        // Handle API exception
-                        Log.e("Google SignIn", "API exception: " + e.getStatusCode());
-                    }
-                    break;
+                                    // Call to startHomeActivity
+                                    startHomeActivity();
+                                } else {
+                                    Log.w("Google SignIn", "signInWithCredential:failure", task.getException());
+                                    Toast.makeText(getApplicationContext(), "Authentication Failed.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+            } catch (ApiException e) {
+                Log.e("Google SignIn", "API exception: " + e.getStatusCode());
             }
+        } else {
+            // Facebook CallbackManager
+            callbackManager.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    public void facebookLogin(View view) {
+        // For FB Login
+        callbackManager = CallbackManager.Factory.create();
+
+        LoginManager.getInstance().registerCallback(callbackManager,
+                new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        handleFacebookAccessToken(loginResult.getAccessToken());
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        // App code
+                    }
+
+                    @Override
+                    public void onError(FacebookException exception) {
+                        // App code
+                    }
+                });
+
+        LoginManager.getInstance().logInWithReadPermissions(login.this, Arrays.asList("public_profile"));
+    }
+
+    private void handleFacebookAccessToken(AccessToken token) {
+
+        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+
+                            FirebaseUser user = mAuth.getCurrentUser();
+
+                            // Save Facebook ID to Firebase along with other user details
+                            String uid = user.getUid();
+                            Map<String, String> userData = new HashMap<>();
+                            //userData.put("username", usernametxt);
+
+                            userData.put("email", user.getEmail());
+                            userData.put("facebook_id", user.getUid()); // Save Facebook ID
+
+                            FirebaseDatabase db = FirebaseDatabase.getInstance();
+                            DatabaseReference users = db.getReference("users");
+
+                            users.child(uid).setValue(userData);
+
+
+                            // Call to startHomeActivity
+                            startActivity(new Intent(login.this, Home.class));
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w("Facebook SignIn", "signInWithCredential:failure", task.getException());
+                            Toast.makeText(getApplicationContext(), "Authentication Failed.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
     private void startHomeActivity() {
         Intent intent = new Intent(getApplicationContext(),Home.class);
         intent.putExtra("email", mAuth.getCurrentUser().getEmail());
