@@ -126,13 +126,13 @@
 
     <ImageButton
         android:id="@+id/googlelogin"
-        android:onClick="buttonGoogleSignIn"
         android:layout_width="75dp"
         android:layout_height="76dp"
         android:layout_marginStart="119dp"
         android:layout_marginTop="605dp"
         android:layout_marginEnd="217dp"
         android:layout_marginBottom="50dp"
+        android:onClick="googleLogin"
         android:background="@android:color/transparent"
         android:contentDescription="Google Login"
         android:scaleType="fitCenter"
@@ -144,7 +144,6 @@
 
     <ImageButton
         android:id="@+id/facebooklogin"
-        android:onClick="fblogin"
         android:layout_width="78dp"
         android:layout_height="60dp"
         android:layout_marginStart="205dp"
