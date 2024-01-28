@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,9 +40,9 @@ public class signup extends AppCompatActivity {
             // User is already logged in, start Home activity
             startHomeActivity();
         }
-        email = (EditText) findViewById(R.id.signupemail);
+        email = (EditText) findViewById(R.id.forgotpasswordemail);
         password = (EditText) findViewById(R.id.loginpassword);
-        signup = (Button) findViewById(R.id.loginbtn);
+        signup = (Button) findViewById(R.id.forgotpasswordbtn);
         aldlogin = (TextView) findViewById(R.id.alreadylogin);
 
         signup.setOnClickListener(new View.OnClickListener() {
@@ -58,7 +57,8 @@ public class signup extends AppCompatActivity {
                 {
                     Toast.makeText(getApplicationContext(), "Empty Field.", Toast.LENGTH_SHORT).show();
                 }
-                else {
+                else
+                {
 
                     Task<AuthResult> authResultTask = mAuth.createUserWithEmailAndPassword(emailtxt, passwordtxt)
                             .addOnCompleteListener(signup.this, new OnCompleteListener<AuthResult>() {
@@ -71,6 +71,8 @@ public class signup extends AppCompatActivity {
                                         editor.apply();
 
                                         Toast.makeText(getApplicationContext(), "User Registed Successfully", Toast.LENGTH_LONG).show();
+
+                                        startActivity(new Intent(signup.this, login.class));
                                     } else {
                                         Toast.makeText(getApplicationContext(), "AN Error Occured", Toast.LENGTH_LONG).show();
                                     }

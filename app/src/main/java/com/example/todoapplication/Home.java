@@ -2,6 +2,7 @@ package com.example.todoapplication;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,10 +21,11 @@ import org.json.JSONObject;
 
 public class Home extends AppCompatActivity {
 
-    TextView useremail,useruid;
+    TextView useruid;
     Button logoutbtn;
     private FirebaseAuth mAuth;
     private AccessToken accessToken;
+    private SharedPreferences sharedPreferences;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -33,43 +35,30 @@ public class Home extends AppCompatActivity {
 
         accessToken = AccessToken.getCurrentAccessToken();
 
-        useremail = findViewById(R.id.useremail);
         useruid = findViewById(R.id.useruid);
         logoutbtn = findViewById(R.id.logoutbtn);
 
-        GraphRequest request = GraphRequest.newMeRequest(
-                accessToken,
-                new GraphRequest.GraphJSONObjectCallback() {
-                    @Override
-                    public void onCompleted(
-                            JSONObject object,
-                            GraphResponse response) {
-                        // Application code
-                        try {
-                            String name = object.getString("name");
-                            useremail.setText("Name:"+name);
-                            Log.d("Graph API Response", object.toString());
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                });
-                Bundle parameters = new Bundle();
-                parameters.putString("fields", "id,name,link");
-                request.setParameters(parameters);
-                request.executeAsync();
+        sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
 
-//        useremail.setText("Username = "+getIntent().getStringExtra("email").toString());
-//        useruid.setText("UID = "+getIntent().getStringExtra("uid").toString());
+        useruid.setText("UID = " + getIntent().getStringExtra("uid"));
 
         logoutbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Sign out the current authenticated user from Firebase
                 FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(getApplicationContext(), signup.class));
 
+                // Set the login status to false in SharedPreferences
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("isLoggedIn", false);
+                editor.apply();
+
+                // Clear the entire task stack and start the signup activity as a new task
+                Intent intent = new Intent(getApplicationContext(), signup.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             }
         });
     }
 }
-
