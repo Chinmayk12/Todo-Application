@@ -7,22 +7,17 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.android.gms.auth.api.identity.BeginSignInRequest;
@@ -44,9 +39,6 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,17 +58,16 @@ public class login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
-        email = findViewById(R.id.loginemail);
-        password = findViewById(R.id.loginpassword);
+        email = findViewById(R.id.username);
+        password = findViewById(R.id.signuppassword);
         forgotPassword = findViewById(R.id.forgotpass);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
-        int flag = sharedPreferences.getInt("flag", 0);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         mAuth = FirebaseAuth.getInstance();
 
         // Check if the user is already authenticated
-        if (mAuth.getCurrentUser() != null && flag != 1) {
+        if (mAuth.getCurrentUser() != null) {
             // User is already logged in, start Home activity
             startHomeActivity();
         }
@@ -228,8 +219,12 @@ public class login extends AppCompatActivity {
     private void saveUserDataToFirebase() {
         String uid = mAuth.getCurrentUser().getUid();
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String username = user.getDisplayName();
+
         Map<String, String> userData = new HashMap<>();
         userData.put("email", mAuth.getCurrentUser().getEmail());
+        userData.put("username",username);
 
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference users = db.getReference("users");
@@ -239,7 +234,7 @@ public class login extends AppCompatActivity {
 
     private void startHomeActivity() {
         Intent intent = new Intent(getApplicationContext(), Home.class);
-        intent.putExtra("uid", mAuth.getCurrentUser().getUid());
+        //intent.putExtra("uid", mAuth.getCurrentUser().getUid());
         startActivity(intent);
         finish();
     }

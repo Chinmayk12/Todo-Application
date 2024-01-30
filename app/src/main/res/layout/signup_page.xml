@@ -17,23 +17,22 @@
         app:srcCompat="@drawable/right_corner1" />
 
     <Button
-        android:id="@+id/forgotpasswordbtn"
+        android:id="@+id/signupbtn"
         android:layout_width="358dp"
         android:layout_height="57dp"
-        android:layout_marginStart="27dp"
-        android:layout_marginEnd="26dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="23dp"
         android:text="Signup"
         android:textSize="15sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/alreadylogin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loginpassword"
-        app:layout_constraintVertical_bias="0.411"
+        app:layout_constraintTop_toBottomOf="@+id/signuppassword"
         tools:ignore="MissingConstraints" />
 
     <EditText
-        android:id="@+id/loginpassword"
+        android:id="@+id/signuppassword"
         android:layout_width="358dp"
         android:layout_height="57dp"
         android:layout_marginStart="27dp"
@@ -47,10 +46,32 @@
         android:inputType="textPassword"
         android:textColor="@color/black"
         android:textColorHint="@color/black"
-        app:layout_constraintBottom_toTopOf="@+id/forgotpasswordbtn"
+        app:layout_constraintBottom_toTopOf="@+id/signupbtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/forgotpasswordemail" />
+        app:layout_constraintTop_toBottomOf="@+id/signupemail" />
+
+    <EditText
+        android:id="@+id/username"
+        android:layout_width="358dp"
+        android:layout_height="57dp"
+        android:layout_marginStart="27dp"
+        android:layout_marginEnd="26dp"
+        android:background="@drawable/rounded_edittext_background"
+        android:drawableStart="@drawable/baseline_person_24"
+        android:drawablePadding="8dp"
+        android:drawableTint="#673AB7"
+        android:ems="10"
+        android:gravity="center"
+        android:hint="Enter Username"
+        android:inputType="text"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/signupemail"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clockimage"
+        tools:ignore="MissingConstraints" />
 
     <ImageView
         android:id="@+id/clockimage"
@@ -62,10 +83,10 @@
         android:src="@drawable/clock_image1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/forgotPassword" />
+        app:layout_constraintTop_toBottomOf="@+id/signuphere" />
 
     <TextView
-        android:id="@+id/forgotPassword"
+        android:id="@+id/signuphere"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="123dp"
@@ -97,11 +118,10 @@
         tools:ignore="DuplicateIds" />
 
     <EditText
-        android:id="@+id/forgotpasswordemail"
+        android:id="@+id/signupemail"
         android:layout_width="358dp"
         android:layout_height="57dp"
         android:layout_marginStart="27dp"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="26dp"
         android:background="@drawable/rounded_edittext_background"
         android:drawableStart="@drawable/baseline_email_24"
@@ -112,22 +132,22 @@
         android:inputType="textEmailAddress"
         android:textColor="@color/black"
         android:textColorHint="@color/black"
-        app:layout_constraintBottom_toTopOf="@+id/loginpassword"
+        app:layout_constraintBottom_toTopOf="@+id/signuppassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clockimage" />
+        app:layout_constraintTop_toBottomOf="@+id/username" />
 
     <TextView
         android:id="@+id/alreadylogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="160dp"
+        android:layout_marginBottom="132dp"
         android:text="Already a user? Login"
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/forgotpasswordbtn"
-        app:layout_constraintHorizontal_bias="0.495"
-        app:layout_constraintStart_toStartOf="@+id/forgotpasswordbtn" />
+        app:layout_constraintEnd_toEndOf="@+id/signupbtn"
+        app:layout_constraintHorizontal_bias="0.484"
+        app:layout_constraintStart_toStartOf="@+id/signupbtn" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,7 +22,7 @@
         tools:ignore="MissingConstraints" />
 
     <EditText
-        android:id="@+id/loginemail"
+        android:id="@+id/username"
         android:layout_width="358dp"
         android:layout_height="57dp"
         android:layout_marginTop="274dp"
@@ -44,7 +44,7 @@
         tools:ignore="MissingConstraints" />
 
     <EditText
-        android:id="@+id/loginpassword"
+        android:id="@+id/signuppassword"
         android:layout_width="358dp"
         android:layout_height="57dp"
         android:layout_marginTop="357dp"
