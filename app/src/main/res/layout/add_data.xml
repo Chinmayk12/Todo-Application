@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Add Data"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="@color/white"
+            android:background="#4CAF50"/>
+
+        <EditText
+            android:id="@+id/inserttasktitle"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:hint="Enter Task Title"
+            android:gravity="center"
+            android:textColorHint="@color/black"
+            />
+
+        <EditText
+            android:id="@+id/inserttaskdesc"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:hint="Enter Task Description"
+            android:gravity="center"
+            android:textColorHint="@color/black"
+            />
+
+        <EditText
+            android:id="@+id/inserttasktime"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:hint="Enter Task Time"
+            android:gravity="center"
+            android:textColorHint="@color/black"
+            />
+
+        <EditText
+            android:id="@+id/insertdate"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:hint="Enter Date"
+            android:gravity="center"
+            android:textColorHint="@color/black"
+            />
+
+        <EditText
+            android:id="@+id/insertday"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:hint="Enter Day"
+            android:gravity="center"
+            android:textColorHint="@color/black"
+            />
+
+        <EditText
+            android:id="@+id/insertmonth"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:hint="Enter Month"
+            android:gravity="center"
+            android:textColorHint="@color/black"
+            />
+
+
+        <EditText
+            android:id="@+id/inserttaskstatus"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:hint="Enter Task Status"
+            android:gravity="center"
+            android:textColorHint="@color/black"
+            />
+
+        <Button
+            android:id="@+id/adddatabtn"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:text="Add Data"
+            android:background="#A39C27B0"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

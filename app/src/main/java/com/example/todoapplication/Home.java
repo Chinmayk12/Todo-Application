@@ -6,14 +6,17 @@ import android.content.SharedPreferences;
 import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,12 +27,20 @@ import com.facebook.GraphResponse;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.orhanobut.dialogplus.DialogPlus;
+import com.orhanobut.dialogplus.ViewHolder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Home extends AppCompatActivity {
 
@@ -51,8 +62,9 @@ public class Home extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         mAuth = FirebaseAuth.getInstance();
         Toast.makeText(getApplicationContext(),"UID:"+mAuth.getCurrentUser().getUid(),Toast.LENGTH_SHORT).show();
+
         /*
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); // For name of user
         String usernametxt = user.getDisplayName();
 
         mAuth = FirebaseAuth.getInstance();
@@ -98,12 +110,6 @@ public class Home extends AppCompatActivity {
         myAdapter = new MyAdapter(options);
         recyclerView.setAdapter(myAdapter);
 
-        calender.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showPopupMenu(view);
-            }
-        });
     }
 
     protected void onStart() {
@@ -116,35 +122,76 @@ public class Home extends AppCompatActivity {
         myAdapter.stopListening();
     }
 
+    public void addData(View view) {
 
-    private void showPopupMenu(View view)
-    {
-        PopupMenu popupMenu = new PopupMenu(this, view);
-        popupMenu.getMenuInflater().inflate(R.menu.menu_options, popupMenu.getMenu());
+        final DialogPlus dialogPlus = DialogPlus.newDialog(Home.this)
+                .setContentHolder(new ViewHolder(R.layout.add_data))
+                .setGravity(Gravity.BOTTOM)
+                .setExpanded(true, 1500)
+                .create();
 
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @SuppressLint("NonConstantResourceId")
+        // Inflate the layout inside the DialogPlus content view
+        View dialogView = dialogPlus.getHolderView();
+
+        EditText date = dialogView.findViewById(R.id.insertdate);
+        EditText day =  dialogView.findViewById(R.id.insertday);
+        EditText month = dialogView.findViewById(R.id.insertmonth);
+        EditText taskdesc = dialogView.findViewById(R.id.inserttaskdesc);
+        EditText taskstatus = dialogView.findViewById(R.id.inserttaskstatus);
+        EditText tasktitle = dialogView.findViewById(R.id.inserttasktitle);
+        EditText tasktime = dialogView.findViewById(R.id.inserttasktime);
+
+        Button adddata = dialogView.findViewById(R.id.adddatabtn);
+
+        adddata.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                int id = menuItem.getItemId();
+            public void onClick(View view) {
 
-                if(id==R.id.menu_update)
-                {
-                    Toast.makeText(getApplicationContext(),"Update",Toast.LENGTH_SHORT).show();
-                }
-                else if (id==R.id.menu_delete)
-                {
-                    Toast.makeText(getApplicationContext(),"Delete",Toast.LENGTH_SHORT).show();
-                }
-                else if (id==R.id.menu_delete)
-                {
-                    Toast.makeText(getApplicationContext(),"Delete",Toast.LENGTH_SHORT).show();
-                }
-                return true;
+                String datetxt = date.getText().toString();
+                String daytxt = day.getText().toString();
+                String monthtxt = month.getText().toString();
+                String taskdesctxt = taskdesc.getText().toString();
+                String taskstatustxt = taskstatus.getText().toString();
+                String tasktitletxt = tasktitle.getText().toString();
+                String tasktimetxt = tasktime.getText().toString();
+
+//                // Check if any field is empty
+//                if (studentName.isEmpty() || studentCourse.isEmpty() || studentEmail.isEmpty() || studentImgUrl.isEmpty()) {
+//                    Toast.makeText(getApplicationContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
+
+                // Create a Map to represent the data
+                Map<String, Object> newData = new HashMap<>();
+                newData.put("date", datetxt);
+                newData.put("day", daytxt);
+                newData.put("month", monthtxt);
+                newData.put("taskdesc", taskdesctxt);
+                newData.put("taskstatus", taskstatustxt);
+                newData.put("tasktitle", tasktitletxt);
+                newData.put("time", tasktimetxt);
+
+
+                String uniqueKey  = FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo").push().getKey();;
+
+                FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo").child(uniqueKey).setValue(newData)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                Toast.makeText(getApplicationContext(),"Data Added",Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getApplicationContext(),"Error While Adding Data",Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
             }
-
         });
 
-        popupMenu.show();
+        dialogPlus.show();
     }
+
 }

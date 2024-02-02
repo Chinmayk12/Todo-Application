@@ -18,8 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_margin="10dp"
-            >
+            android:layout_margin="10dp">
 
             <TextView
                 android:id="@+id/day"
@@ -95,10 +94,11 @@
             android:layout_height="match_parent">
 
             <ImageView
+                android:id="@+id/moreoptions"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_alignParentEnd="true"
-                android:src="@drawable/calendar"
+                android:src="@drawable/more_logo"
                 />
 
             <TextView

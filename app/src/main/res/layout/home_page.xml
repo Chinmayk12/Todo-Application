@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:id="@+id/rv1"
     tools:context=".Home">
 
     <androidx.cardview.widget.CardView
@@ -52,8 +51,8 @@
                 />
         </RelativeLayout>
 
-
     </androidx.cardview.widget.CardView>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -66,13 +65,14 @@
     </androidx.recyclerview.widget.RecyclerView>
 
     <TextView
+        android:id="@+id/addData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="+ Add Data"
-        android:textSize="25sp"
-        android:layout_margin="10dp"
-        android:textColor="#2196F3"
+        android:onClick="addData"
         android:layout_gravity="center"
-        />
+        android:layout_margin="10dp"
+        android:text="+ Add Data"
+        android:textColor="#2196F3"
+        android:textSize="25sp" />
 
 </LinearLayout>

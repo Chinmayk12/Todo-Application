@@ -229,7 +229,7 @@ public class login extends AppCompatActivity {
         FirebaseDatabase db = FirebaseDatabase.getInstance();
         DatabaseReference users = db.getReference("users");
 
-        users.child(uid).setValue(userData);
+        users.child(uid).child("userinfo").setValue(userData);
     }
 
     private void startHomeActivity() {

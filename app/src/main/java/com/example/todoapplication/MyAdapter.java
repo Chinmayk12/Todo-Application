@@ -6,10 +6,13 @@ import android.content.DialogInterface;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,12 +38,19 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model,MyAdapter.myViewHol
     protected void onBindViewHolder(@NonNull myViewHolder holder, @SuppressLint("RecyclerView") final int position, @NonNull final Model model) {
 
         holder.day.setText(model.getDay());
-        holder.date.setText((int) model.getDate());
+        holder.date.setText((model.getDate()));
         holder.month.setText(model.getMonth());
         holder.tasktitle.setText(model.getTasktitle());
         holder.taskdesc.setText(model.getTaskdesc());
         holder.time.setText(model.getTime());
-        holder.status.setText(model.getStatus());
+        holder.status.setText(model.getTaskstatus());
+
+        holder.moreoptions.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showPopupMenu(view);
+            }
+        });
     }
 
     @NonNull
@@ -54,6 +64,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model,MyAdapter.myViewHol
     class myViewHolder extends RecyclerView.ViewHolder
     {
         TextView day,date,month,tasktitle,taskdesc,time,status;
+        ImageView moreoptions;
 
         public myViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -66,6 +77,39 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model,MyAdapter.myViewHol
             time = (TextView) itemView.findViewById(R.id.tasktitle);
             status = (TextView) itemView.findViewById(R.id.taskstatus);
 
+            moreoptions = (ImageView) itemView.findViewById(R.id.moreoptions);
+
         }
     }
+    private void showPopupMenu(View view)
+    {
+        PopupMenu popupMenu = new PopupMenu(view.getContext(), view);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_options, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @SuppressLint("NonConstantResourceId")
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                int id = menuItem.getItemId();
+
+                if(id==R.id.menu_update)
+                {
+                    Toast.makeText(view.getContext(),"Update",Toast.LENGTH_SHORT).show();
+                }
+                else if (id==R.id.menu_delete)
+                {
+                    Toast.makeText(view.getContext(),"Delete",Toast.LENGTH_SHORT).show();
+                }
+                else if (id==R.id.menu_delete)
+                {
+                    Toast.makeText(view.getContext(),"Delete",Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            }
+
+        });
+
+        popupMenu.show();
+    }
+
 }
