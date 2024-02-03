@@ -1,8 +1,9 @@
 package com.example.todoapplication;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -10,10 +11,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,9 +26,17 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.orhanobut.dialogplus.DialogPlus;
+import com.orhanobut.dialogplus.ViewHolder;
 
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHolder> {
@@ -36,6 +47,13 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
 
     @Override
     protected void onBindViewHolder(@NonNull myViewHolder holder, @SuppressLint("RecyclerView") final int position, @NonNull final Model model) {
+
+        // Check task status and set color accordingly
+        if ("Done".equals(model.getTaskstatus())) {
+            holder.status.setTextColor(Color.GREEN); // Set your completed color
+        } else {
+            holder.status.setTextColor(Color.RED); // Set your pending color
+        }
 
         holder.day.setText(model.getDay());
         holder.date.setText((model.getDate()));
@@ -49,7 +67,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         holder.moreoptions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showPopupMenu(view,getRef(position).getKey()); // getRef(position).getKey() will give the id of the todo task
+                showPopupMenu(view, getRef(position).getKey()); // getRef(position).getKey() will give the id of the todo task
             }
         });
     }
@@ -74,7 +92,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
             month = (TextView) itemView.findViewById(R.id.month);
             tasktitle = (TextView) itemView.findViewById(R.id.tasktitle);
             taskdesc = (TextView) itemView.findViewById(R.id.taskdescription);
-            time = (TextView) itemView.findViewById(R.id.tasktitle);
+            time = (TextView) itemView.findViewById(R.id.tasktime);
             status = (TextView) itemView.findViewById(R.id.taskstatus);
 
             moreoptions = (ImageView) itemView.findViewById(R.id.moreoptions);
@@ -82,7 +100,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         }
     }
 
-    private void showPopupMenu(View view,String todoid) {
+    private void showPopupMenu(View view, String todoid) {
         PopupMenu popupMenu = new PopupMenu(view.getContext(), view);
         popupMenu.getMenuInflater().inflate(R.menu.menu_options, popupMenu.getMenu());
 
@@ -93,12 +111,14 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                 int id = menuItem.getItemId();
 
                 if (id == R.id.menu_update) {
-                    Toast.makeText(view.getContext(), "Update", Toast.LENGTH_SHORT).show();
+                    updateTodo(view, todoid);
+                    //Toast.makeText(view.getContext(), "Update", Toast.LENGTH_SHORT).show();
                 } else if (id == R.id.menu_delete) {
-                    deleteTodo(view,todoid);
+                    deleteTodo(view, todoid);
                     //Toast.makeText(view.getContext(), "Delete", Toast.LENGTH_SHORT).show();
-                } else if (id == R.id.menu_delete) {
-                    Toast.makeText(view.getContext(), "Delete", Toast.LENGTH_SHORT).show();
+                } else if (id == R.id.menu_complete) {
+                    completeTodo(view, todoid);
+                    Toast.makeText(view.getContext(), "Complete", Toast.LENGTH_SHORT).show();
                 }
                 return true;
             }
@@ -108,13 +128,163 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         popupMenu.show();
     }
 
-    private void deleteTodo(View view,String itemId) {
-        FirebaseDatabase.getInstance().getReference().child("users").child("15qi5crURVTNPaI02fEbVquIX9r1").child("todo").child(itemId)
+    private void completeTodo(View view, String todoid) {
+        DatabaseReference todoRef = FirebaseDatabase.getInstance().getReference()
+                .child("users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .child("todo")
+                .child(todoid);
+
+        // Update taskstatus to "Completed" in the Firebase Realtime Database
+        todoRef.child("taskstatus").setValue("Done")
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        // Successfully updated status
+                        Toast.makeText(view.getContext(), "Task Completed", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Handle failure
+                        Toast.makeText(view.getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+
+    private void updateTodo(View view, String todoid) {
+        final DialogPlus dialogPlus = DialogPlus.newDialog(view.getContext())
+                .setContentHolder(new ViewHolder(R.layout.update_task))
+                .setGravity(Gravity.BOTTOM)
+                .setExpanded(true, 2000)
+                .create();
+
+        // Inflate the layout inside the DialogPlus content view
+        View dialogView = dialogPlus.getHolderView();
+
+        EditText tasktitle = dialogView.findViewById(R.id.updatetasktitle);
+        EditText taskdesc = dialogView.findViewById(R.id.updatetaskdescription);
+        EditText taskdate = dialogView.findViewById(R.id.updatetaskdate);
+        EditText tasktime = dialogView.findViewById(R.id.updatetasktime);
+        Button updateData = dialogView.findViewById(R.id.updatebtn);
+
+        DatabaseReference todoRef = FirebaseDatabase.getInstance().getReference()
+                .child("users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .child("todo")
+                .child(todoid);
+
+
+        todoRef.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Model existingModel = dataSnapshot.getValue(Model.class);
+
+                    // Set the existing data to the corresponding fields in the update dialog
+                    tasktitle.setText(existingModel.getTasktitle());
+                    taskdesc.setText(existingModel.getTaskdesc());
+                    taskdate.setText(existingModel.getDate());
+                    tasktime.setText(existingModel.getTime());
+                }
+            }
+        });
+
+        taskdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("DatePicker", "EditText clicked"); // Add this line
+                DatePickerDialog dialog = new DatePickerDialog(view.getContext(),
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view,
+                                                  int year, int month, int dayOfMonth) {
+                                taskdate.setText(dayOfMonth + "/" + (month + 1) + "/" + year);
+                            }
+                        }, 2024, 2, 7);
+                dialog.show();
+            }
+        });
+
+        tasktime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Calendar calendar = Calendar.getInstance();
+                int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                int minute = calendar.get(Calendar.MINUTE);
+
+                // Create a TimePickerDialog
+                TimePickerDialog timePickerDialog = new TimePickerDialog(
+                        view.getContext(),
+                        new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                // Update the tasktime EditText with the selected time
+                                tasktime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
+                            }
+                        },
+                        hour, minute, false  // 24-hour format
+                );
+
+                timePickerDialog.show();
+            }
+        });
+
+        updateData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Map<String, Object> updateData = new HashMap<>();
+
+                String tasktitletxt = tasktitle.getText().toString().trim();
+                String taskdesctxt = taskdesc.getText().toString().trim();
+                String datetxt = taskdate.getText().toString().trim();
+                String tasktimetxt = tasktime.getText().toString().trim();
+
+                updateData.put("tasktitle", tasktitletxt);
+                updateData.put("taskdesc", taskdesctxt);
+                updateData.put("date", datetxt);
+                updateData.put("time", tasktimetxt);
+                updateData.put("taskstatus", "Pending");
+
+                Task<Void> todoRef = FirebaseDatabase.getInstance().getReference()
+                        .child("users")
+                        .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                        .child("todo")
+                        .child(todoid)
+                        .updateChildren(updateData)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                Toast.makeText(view.getContext(),"Data Updated",Toast.LENGTH_SHORT).show();
+                                dialogPlus.dismiss();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(view.getContext(),"Error:"+e.getMessage().toString(),Toast.LENGTH_SHORT).show();
+                                Log.d("Error",e.getMessage().toString());
+                            }
+                        });
+            }
+        });
+
+        dialogPlus.show();
+    }
+
+
+    private void deleteTodo(View view, String itemId) {
+
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        FirebaseDatabase.getInstance().getReference().child("users").child(currentUserId).child("todo").child(itemId)
                 .removeValue()
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(view.getContext(), "Item Id = "+itemId, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(view.getContext(), "Item Id = " + itemId, Toast.LENGTH_SHORT).show();
                         Toast.makeText(view.getContext(), "Todo deleted successfully", Toast.LENGTH_SHORT).show();
                     }
                 })

@@ -1,6 +1,9 @@
 package com.example.todoapplication;
 
 import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.Image;
@@ -10,10 +13,12 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,7 +44,9 @@ import com.orhanobut.dialogplus.ViewHolder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class Home extends AppCompatActivity {
@@ -52,16 +59,23 @@ public class Home extends AppCompatActivity {
     ImageView calender;
     RecyclerView recyclerView;
     private MyAdapter myAdapter;
-
+    DialogPlus dialogPlus;
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
 
+        username = (TextView) findViewById(R.id.hello);
+
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        String usernametxt = user.getDisplayName();
+        username.setText("Hello "+usernametxt);
+
         mAuth = FirebaseAuth.getInstance();
         Toast.makeText(getApplicationContext(),"UID:"+mAuth.getCurrentUser().getUid(),Toast.LENGTH_SHORT).show();
+
 
         /*
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); // For name of user
@@ -125,34 +139,69 @@ public class Home extends AppCompatActivity {
     public void addData(View view) {
 
         final DialogPlus dialogPlus = DialogPlus.newDialog(Home.this)
-                .setContentHolder(new ViewHolder(R.layout.add_data))
+                .setContentHolder(new ViewHolder(R.layout.add_task))
                 .setGravity(Gravity.BOTTOM)
-                .setExpanded(true, 1500)
+                .setExpanded(true, 2000)
+                .setCancelable(true)
                 .create();
 
         // Inflate the layout inside the DialogPlus content view
         View dialogView = dialogPlus.getHolderView();
 
-        EditText date = dialogView.findViewById(R.id.insertdate);
-        EditText day =  dialogView.findViewById(R.id.insertday);
-        EditText month = dialogView.findViewById(R.id.insertmonth);
-        EditText taskdesc = dialogView.findViewById(R.id.inserttaskdesc);
-        EditText taskstatus = dialogView.findViewById(R.id.inserttaskstatus);
-        EditText tasktitle = dialogView.findViewById(R.id.inserttasktitle);
-        EditText tasktime = dialogView.findViewById(R.id.inserttasktime);
+        EditText tasktitle = dialogView.findViewById(R.id.tasktitle);
+        EditText taskdesc = dialogView.findViewById(R.id.taskdescription);
+        EditText taskdate = dialogView.findViewById(R.id.taskdate);
+        EditText tasktime = dialogView.findViewById(R.id.tasktime);
 
-        Button adddata = dialogView.findViewById(R.id.adddatabtn);
+        Button adddata = dialogView.findViewById(R.id.addtask);
+
+        taskdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("DatePicker", "EditText clicked"); // Add this line
+                DatePickerDialog dialog = new DatePickerDialog(Home.this,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view,
+                                                  int year, int month, int dayOfMonth) {
+                                taskdate.setText(dayOfMonth+"/"+(month+1)+"/"+year);
+                            }
+                        }, 2024, 2, 7);
+                dialog.show();
+            }
+        });
+
+        tasktime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Calendar calendar = Calendar.getInstance();
+                int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                int minute = calendar.get(Calendar.MINUTE);
+
+                // Create a TimePickerDialog
+                TimePickerDialog timePickerDialog = new TimePickerDialog(
+                        Home.this,
+                        new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                // Update the tasktime EditText with the selected time
+                                tasktime.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
+                            }
+                        },
+                        hour, minute, false  // 24-hour format
+                );
+
+                timePickerDialog.show();
+            }
+        });
 
         adddata.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                String datetxt = date.getText().toString();
-                String daytxt = day.getText().toString();
-                String monthtxt = month.getText().toString();
-                String taskdesctxt = taskdesc.getText().toString();
-                String taskstatustxt = taskstatus.getText().toString();
                 String tasktitletxt = tasktitle.getText().toString();
+                String taskdesctxt = taskdesc.getText().toString();
+                String datetxt = taskdate.getText().toString();
                 String tasktimetxt = tasktime.getText().toString();
 
 //                // Check if any field is empty
@@ -163,14 +212,12 @@ public class Home extends AppCompatActivity {
 
                 // Create a Map to represent the data
                 Map<String, Object> newData = new HashMap<>();
-                newData.put("date", datetxt);
-                newData.put("day", daytxt);
-                newData.put("month", monthtxt);
-                newData.put("taskdesc", taskdesctxt);
-                newData.put("taskstatus", taskstatustxt);
-                newData.put("tasktitle", tasktitletxt);
-                newData.put("time", tasktimetxt);
 
+                newData.put("tasktitle", tasktitletxt);
+                newData.put("taskdesc", taskdesctxt);
+                newData.put("date", datetxt);
+                newData.put("time", tasktimetxt);
+                newData.put("taskstatus", "Pending");
 
                 String uniqueKey  = FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo").push().getKey();;
 
@@ -192,6 +239,16 @@ public class Home extends AppCompatActivity {
         });
 
         dialogPlus.show();
+    }
+    public void onBackPressed() {
+        // Check if DialogPlus is showing and dismiss it
+        if (dialogPlus != null && dialogPlus.isShowing()) {
+            Log.d("Back Button Clicked ?","Yes ");
+            dialogPlus.dismiss();
+        } else {
+            // If DialogPlus is not showing, proceed with the default behavior
+            super.onBackPressed();
+        }
     }
 
 }
