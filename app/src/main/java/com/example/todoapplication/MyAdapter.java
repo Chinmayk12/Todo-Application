@@ -28,7 +28,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MyAdapter extends FirebaseRecyclerAdapter<Model,MyAdapter.myViewHolder> {
+public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHolder> {
 
     public MyAdapter(@NonNull FirebaseRecyclerOptions<Model> options) {
         super(options);
@@ -45,10 +45,11 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model,MyAdapter.myViewHol
         holder.time.setText(model.getTime());
         holder.status.setText(model.getTaskstatus());
 
+
         holder.moreoptions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showPopupMenu(view);
+                showPopupMenu(view,getRef(position).getKey()); // getRef(position).getKey() will give the id of the todo task
             }
         });
     }
@@ -57,13 +58,12 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model,MyAdapter.myViewHol
     @Override
     public myViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.single_row,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.single_row, parent, false);
         return new myViewHolder(view);
     }
 
-    class myViewHolder extends RecyclerView.ViewHolder
-    {
-        TextView day,date,month,tasktitle,taskdesc,time,status;
+    class myViewHolder extends RecyclerView.ViewHolder {
+        TextView day, date, month, tasktitle, taskdesc, time, status;
         ImageView moreoptions;
 
         public myViewHolder(@NonNull View itemView) {
@@ -81,8 +81,8 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model,MyAdapter.myViewHol
 
         }
     }
-    private void showPopupMenu(View view)
-    {
+
+    private void showPopupMenu(View view,String todoid) {
         PopupMenu popupMenu = new PopupMenu(view.getContext(), view);
         popupMenu.getMenuInflater().inflate(R.menu.menu_options, popupMenu.getMenu());
 
@@ -92,17 +92,13 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model,MyAdapter.myViewHol
             public boolean onMenuItemClick(MenuItem menuItem) {
                 int id = menuItem.getItemId();
 
-                if(id==R.id.menu_update)
-                {
-                    Toast.makeText(view.getContext(),"Update",Toast.LENGTH_SHORT).show();
-                }
-                else if (id==R.id.menu_delete)
-                {
-                    Toast.makeText(view.getContext(),"Delete",Toast.LENGTH_SHORT).show();
-                }
-                else if (id==R.id.menu_delete)
-                {
-                    Toast.makeText(view.getContext(),"Delete",Toast.LENGTH_SHORT).show();
+                if (id == R.id.menu_update) {
+                    Toast.makeText(view.getContext(), "Update", Toast.LENGTH_SHORT).show();
+                } else if (id == R.id.menu_delete) {
+                    deleteTodo(view,todoid);
+                    //Toast.makeText(view.getContext(), "Delete", Toast.LENGTH_SHORT).show();
+                } else if (id == R.id.menu_delete) {
+                    Toast.makeText(view.getContext(), "Delete", Toast.LENGTH_SHORT).show();
                 }
                 return true;
             }
@@ -110,6 +106,25 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model,MyAdapter.myViewHol
         });
 
         popupMenu.show();
+    }
+
+    private void deleteTodo(View view,String itemId) {
+        FirebaseDatabase.getInstance().getReference().child("users").child("15qi5crURVTNPaI02fEbVquIX9r1").child("todo").child(itemId)
+                .removeValue()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(view.getContext(), "Item Id = "+itemId, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(view.getContext(), "Todo deleted successfully", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("MyAdapter", "Error deleting todo", e);
+                        Toast.makeText(view.getContext(), "Error deleting todo", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
 }
