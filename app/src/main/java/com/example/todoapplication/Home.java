@@ -145,7 +145,6 @@ public class Home extends AppCompatActivity {
                 .setCancelable(true)
                 .create();
 
-
         // Inflate the layout inside the DialogPlus content view
         View dialogView = dialogPlus.getHolderView();
 
@@ -164,7 +163,7 @@ public class Home extends AppCompatActivity {
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view,
-                                                  int year, int month, int dayOfMonth) {
+                                                    int year, int month, int dayOfMonth) {
                                 taskdate.setText(dayOfMonth+"/"+(month+1)+"/"+year);
                             }
                         }, 2024, 2, 7);

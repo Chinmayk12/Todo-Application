@@ -1,8 +1,10 @@
 package com.example.todoapplication;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.Gravity;
@@ -118,7 +120,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                     //Toast.makeText(view.getContext(), "Delete", Toast.LENGTH_SHORT).show();
                 } else if (id == R.id.menu_complete) {
                     completeTodo(view, todoid);
-                    Toast.makeText(view.getContext(), "Complete", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(view.getContext(), "Complete", Toast.LENGTH_SHORT).show();
                 }
                 return true;
             }
@@ -129,28 +131,48 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
     }
 
     private void completeTodo(View view, String todoid) {
+
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         DatabaseReference todoRef = FirebaseDatabase.getInstance().getReference()
                 .child("users")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .child("todo")
                 .child(todoid);
 
-        // Update taskstatus to "Completed" in the Firebase Realtime Database
-        todoRef.child("taskstatus").setValue("Done")
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        // Successfully updated status
-                        Toast.makeText(view.getContext(), "Task Completed", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // Handle failure
-                        Toast.makeText(view.getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+        builder.setTitle("Complete Todo");
+        builder.setMessage("Are you sure you want to Complete this Todo?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // User clicked Yes, proceed with the deletion
+                todoRef.child("taskstatus").setValue("Done")
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                // Successfully updated status
+                                Toast.makeText(view.getContext(), "Task Completed", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Handle failure
+                                Toast.makeText(view.getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface alertDialog, int which) {
+                // User clicked No, do nothing
+                alertDialog.dismiss();
+            }
+        });
+
+        builder.create().show();
     }
 
 
@@ -186,7 +208,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                     // Set the existing data to the corresponding fields in the update dialog
                     tasktitle.setText(existingModel.getTasktitle());
                     taskdesc.setText(existingModel.getTaskdesc());
-                    taskdate.setText(existingModel.getDate());
+                    taskdate.setText(existingModel.getFullDate());
                     tasktime.setText(existingModel.getTime());
                 }
             }
@@ -279,22 +301,41 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
 
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        FirebaseDatabase.getInstance().getReference().child("users").child(currentUserId).child("todo").child(itemId)
-                .removeValue()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(view.getContext(), "Item Id = " + itemId, Toast.LENGTH_SHORT).show();
-                        Toast.makeText(view.getContext(), "Todo deleted successfully", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e("MyAdapter", "Error deleting todo", e);
-                        Toast.makeText(view.getContext(), "Error deleting todo", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+        builder.setTitle("Delete Todo");
+        builder.setMessage("Are you sure you want to delete this Todo?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // User clicked Yes, proceed with the deletion
+                FirebaseDatabase.getInstance().getReference().child("users")
+                        .child(currentUserId).child("todo").child(itemId)
+                        .removeValue()
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(view.getContext(), "Item Id = " + itemId, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(view.getContext(), "Todo deleted successfully", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e("MyAdapter", "Error deleting todo", e);
+                                Toast.makeText(view.getContext(), "Error deleting todo", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface alertDialog, int which) {
+                // User clicked No, do nothing
+                alertDialog.dismiss();
+            }
+        });
+
+        builder.create().show();
     }
 
 }
