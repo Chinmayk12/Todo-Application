@@ -145,6 +145,7 @@ public class Home extends AppCompatActivity {
                 .setCancelable(true)
                 .create();
 
+
         // Inflate the layout inside the DialogPlus content view
         View dialogView = dialogPlus.getHolderView();
 
