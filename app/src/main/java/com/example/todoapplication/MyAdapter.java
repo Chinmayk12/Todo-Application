@@ -12,11 +12,14 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -53,8 +56,10 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         // Check task status and set color accordingly
         if ("Done".equals(model.getTaskstatus())) {
             holder.status.setTextColor(Color.GREEN); // Set your completed color
-        } else {
-            holder.status.setTextColor(Color.RED); // Set your pending color
+        } else if ("Ongoing".equals(model.getTaskstatus())) {
+            holder.status.setTextColor(Color.rgb(255, 165, 0)); // Orange for Ongoing
+        } else if ("Pending".equals(model.getTaskstatus())){
+            holder.status.setTextColor(Color.RED); // Red for pending color
         }
 
         holder.day.setText(model.getDay());
@@ -180,24 +185,44 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         final DialogPlus dialogPlus = DialogPlus.newDialog(view.getContext())
                 .setContentHolder(new ViewHolder(R.layout.update_task))
                 .setGravity(Gravity.BOTTOM)
-                .setExpanded(true, 2000)
+                .setExpanded(true, 2100)
                 .create();
 
         // Inflate the layout inside the DialogPlus content view
-        View dialogView = dialogPlus.getHolderView();
+        final View[] dialogView = {dialogPlus.getHolderView()};
 
-        EditText tasktitle = dialogView.findViewById(R.id.updatetasktitle);
-        EditText taskdesc = dialogView.findViewById(R.id.updatetaskdescription);
-        EditText taskdate = dialogView.findViewById(R.id.updatetaskdate);
-        EditText tasktime = dialogView.findViewById(R.id.updatetasktime);
-        Button updateData = dialogView.findViewById(R.id.updatebtn);
+        final String[] selectedStatus = new String[1];
+
+        EditText tasktitle = dialogView[0].findViewById(R.id.updatetasktitle);
+        EditText taskdesc = dialogView[0].findViewById(R.id.updatetaskdescription);
+        EditText taskdate = dialogView[0].findViewById(R.id.updatetaskdate);
+        EditText tasktime = dialogView[0].findViewById(R.id.updatetasktime);
+
+        String[] statusOptions = {"Pending", "Ongoing"};
+        Spinner taskStatus = dialogView[0].findViewById(R.id.spinnerTaskStatus);
+        ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_item, statusOptions);
+        taskStatus.setAdapter(statusAdapter);
+
+        taskStatus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // Handle the selected status
+                selectedStatus[0] = statusOptions[position];
+                // Do something with the selected status
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // Do nothing here
+            }
+        });
+        Button updateData = dialogView[0].findViewById(R.id.updatebtn);
 
         DatabaseReference todoRef = FirebaseDatabase.getInstance().getReference()
                 .child("users")
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .child("todo")
                 .child(todoid);
-
 
         todoRef.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
             @Override
@@ -268,7 +293,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                 updateData.put("taskdesc", taskdesctxt);
                 updateData.put("date", datetxt);
                 updateData.put("time", tasktimetxt);
-                updateData.put("taskstatus", "Pending");
+                updateData.put("taskstatus", selectedStatus[0]);
 
                 Task<Void> todoRef = FirebaseDatabase.getInstance().getReference()
                         .child("users")
@@ -314,7 +339,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-                                Toast.makeText(view.getContext(), "Item Id = " + itemId, Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(view.getContext(), "Item Id = " + itemId, Toast.LENGTH_SHORT).show();
                                 Toast.makeText(view.getContext(), "Todo deleted successfully", Toast.LENGTH_SHORT).show();
                             }
                         })
