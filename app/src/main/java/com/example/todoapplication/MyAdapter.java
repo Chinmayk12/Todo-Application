@@ -250,7 +250,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                                                   int year, int month, int dayOfMonth) {
                                 taskdate.setText(dayOfMonth + "/" + (month + 1) + "/" + year);
                             }
-                        }, 2024, 2, 7);
+                        }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
                 dialog.show();
             }
         });

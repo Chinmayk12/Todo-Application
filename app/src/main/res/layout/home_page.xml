@@ -71,7 +71,7 @@
         android:onClick="addData"
         android:layout_gravity="center"
         android:layout_margin="10dp"
-        android:text="+ Add Data"
+        android:text="+ Add Task"
         android:textColor="#2196F3"
         android:textSize="25sp" />
 

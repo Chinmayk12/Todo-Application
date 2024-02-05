@@ -36,16 +36,21 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -60,6 +65,7 @@ public class Home extends AppCompatActivity {
     RecyclerView recyclerView;
     private MyAdapter myAdapter;
     DialogPlus dialogPlus;
+    private List<String> taskDates;
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +80,7 @@ public class Home extends AppCompatActivity {
         username.setText("Hello "+usernametxt);
 
         mAuth = FirebaseAuth.getInstance();
-        Toast.makeText(getApplicationContext(),"UID:"+mAuth.getCurrentUser().getUid(),Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(),"UID:"+mAuth.getCurrentUser().getUid(),Toast.LENGTH_SHORT).show();
 
 
         /*
@@ -113,6 +119,29 @@ public class Home extends AppCompatActivity {
 
         calender = (ImageView) findViewById(R.id.calenderimg);
 
+        calender.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Fetch task dates from the database or any other method
+                fetchTaskDatesFromDatabase();
+
+                // Use the custom DatePickerDialog with task dates
+                CustomDatePickerDialog dialog = new CustomDatePickerDialog(Home.this,
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                                // Handle date selection
+                            }
+                        },
+                        Calendar.getInstance().get(Calendar.YEAR),
+                        Calendar.getInstance().get(Calendar.MONTH),
+                        Calendar.getInstance().get(Calendar.DAY_OF_MONTH),
+                        taskDates);
+
+                dialog.show();
+            }
+        });
+
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -134,6 +163,33 @@ public class Home extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         myAdapter.stopListening();
+    }
+
+    private void fetchTaskDatesFromDatabase() {
+        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference()
+                .child("users")
+                .child(mAuth.getCurrentUser().getUid())
+                .child("todo");
+
+        taskDates = new ArrayList<>();
+
+        databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Model task = snapshot.getValue(Model.class);
+                    if (task != null && task.getDate() != null) {
+                        taskDates.add(task.getDate());
+                    }
+                }
+                // Now taskDates list contains all the dates with assigned tasks
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("fetchTaskDates", "Error fetching task dates", databaseError.toException());
+            }
+        });
     }
 
     public void addData(View view) {
@@ -158,7 +214,7 @@ public class Home extends AppCompatActivity {
         taskdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("DatePicker", "EditText clicked"); // Add this line
+                //Log.d("DatePicker", "EditText clicked"); // Add this line
                 DatePickerDialog dialog = new DatePickerDialog(Home.this,
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
@@ -166,7 +222,7 @@ public class Home extends AppCompatActivity {
                                                     int year, int month, int dayOfMonth) {
                                 taskdate.setText(dayOfMonth+"/"+(month+1)+"/"+year);
                             }
-                        }, 2024, 2, 7);
+                        }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
                 dialog.show();
             }
         });
