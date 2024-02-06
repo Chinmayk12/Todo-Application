@@ -1,37 +1,34 @@
 package com.example.todoapplication;
 
 import android.annotation.SuppressLint;
+import com.applandeo.materialcalendarview.CalendarDay;
+import java.util.Calendar;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.TimePickerDialog;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.Image;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.applandeo.materialcalendarview.CalendarDay;
+import com.applandeo.materialcalendarview.CalendarView;
+import com.applandeo.materialcalendarview.EventDay;
+import com.applandeo.materialcalendarview.utils.DateUtils;
 import com.facebook.AccessToken;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -43,9 +40,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -66,6 +60,8 @@ public class Home extends AppCompatActivity {
     private MyAdapter myAdapter;
     DialogPlus dialogPlus;
     private List<String> taskDates;
+    private CalendarView calendarView;
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,31 +113,6 @@ public class Home extends AppCompatActivity {
         });
         */
 
-        calender = (ImageView) findViewById(R.id.calenderimg);
-
-        calender.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Fetch task dates from the database or any other method
-                fetchTaskDatesFromDatabase();
-
-                // Use the custom DatePickerDialog with task dates
-                CustomDatePickerDialog dialog = new CustomDatePickerDialog(Home.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                            @Override
-                            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                                // Handle date selection
-                            }
-                        },
-                        Calendar.getInstance().get(Calendar.YEAR),
-                        Calendar.getInstance().get(Calendar.MONTH),
-                        Calendar.getInstance().get(Calendar.DAY_OF_MONTH),
-                        taskDates);
-
-                dialog.show();
-            }
-        });
-
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -155,6 +126,72 @@ public class Home extends AppCompatActivity {
 
     }
 
+    public void openDateDialog(View view)
+    {
+
+        final DialogPlus dialogPlus = DialogPlus.newDialog(Home.this)
+                .setContentHolder(new ViewHolder(R.layout.custom_date_picker))
+                .setGravity(Gravity.BOTTOM)
+                .setExpanded(true, 1500)
+                .setCancelable(true)
+                .create();
+
+        View dialogView = dialogPlus.getHolderView();
+        calendarView = dialogView.findViewById(R.id.materialCalendarView);
+        markTaskDates(calendarView);
+
+        dialogPlus.show();
+    }
+
+    private void markTaskDates(CalendarView calendarView) {
+        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference()
+                .child("users")
+                .child(mAuth.getCurrentUser().getUid())
+                .child("todo");
+
+        databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<EventDay> events = new ArrayList<>();
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Model task = snapshot.getValue(Model.class);
+                    if (task != null && task.getDate() != null) {
+
+                        // Assuming the date format is "d/M/yyyy"
+                        String[] dateParts = task.getDate().split("/");
+                        if (dateParts.length == 3) {
+
+                            Toast.makeText(getApplicationContext(),"Entered",Toast.LENGTH_SHORT).show();
+
+                            int dayOfMonth = Integer.parseInt(dateParts[0]);
+                            int month = Integer.parseInt(dateParts[1]) - 1; // Months are 0-indexed
+                            int year = Integer.parseInt(dateParts[2]);
+
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                            calendar.set(Calendar.MONTH, month); // Months are 0-indexed
+                            calendar.set(Calendar.YEAR, year);
+
+                            events.add(new EventDay(calendar, R.drawable.dot, Color.parseColor("#228B22")));
+                        }
+                    }
+                }
+
+                // Set events to mark task dates with dots
+                calendarView.setEvents(events);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Handle errors
+            }
+        });
+    }
+
+
+
+
     protected void onStart() {
         super.onStart();
         myAdapter.startListening();
@@ -163,33 +200,6 @@ public class Home extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         myAdapter.stopListening();
-    }
-
-    private void fetchTaskDatesFromDatabase() {
-        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference()
-                .child("users")
-                .child(mAuth.getCurrentUser().getUid())
-                .child("todo");
-
-        taskDates = new ArrayList<>();
-
-        databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Model task = snapshot.getValue(Model.class);
-                    if (task != null && task.getDate() != null) {
-                        taskDates.add(task.getDate());
-                    }
-                }
-                // Now taskDates list contains all the dates with assigned tasks
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e("fetchTaskDates", "Error fetching task dates", databaseError.toException());
-            }
-        });
     }
 
     public void addData(View view) {
