@@ -28,15 +28,15 @@ public class Model {
         return fullDate;
     }
 
-    public void setFullDate(String fullDate) {
-        this.fullDate = fullDate;
-    }
-
-
     public void setDate(String date) {
         this.date = date;
         setFullDate(date);
     }
+
+    public void setFullDate(String date) {
+        this.fullDate = date;
+    }
+
 
     public String getTaskdesc() {
         return taskdesc;

@@ -2,6 +2,8 @@ package com.example.todoapplication;
 
 import android.annotation.SuppressLint;
 import com.applandeo.materialcalendarview.CalendarDay;
+
+import java.util.Arrays;
 import java.util.Calendar;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
@@ -26,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.applandeo.materialcalendarview.CalendarDay;
 import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
+import com.applandeo.materialcalendarview.listeners.OnCalendarPageChangeListener;
 import com.applandeo.materialcalendarview.utils.DateUtils;
 import com.facebook.AccessToken;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -43,6 +46,7 @@ import com.orhanobut.dialogplus.ViewHolder;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -55,7 +59,7 @@ public class Home extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private AccessToken accessToken;
     private SharedPreferences sharedPreferences;
-    ImageView calender;
+    ImageView calender,calenderBackButton;
     RecyclerView recyclerView;
     private MyAdapter myAdapter;
     DialogPlus dialogPlus;
@@ -76,8 +80,7 @@ public class Home extends AppCompatActivity {
         username.setText("Hello "+usernametxt);
 
         mAuth = FirebaseAuth.getInstance();
-        //Toast.makeText(getApplicationContext(),"UID:"+mAuth.getCurrentUser().getUid(),Toast.LENGTH_SHORT).show();
-
+        Toast.makeText(getApplicationContext(),"UID:"+mAuth.getCurrentUser().getUid(),Toast.LENGTH_SHORT).show();
 
         /*
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); // For name of user
@@ -128,22 +131,35 @@ public class Home extends AppCompatActivity {
 
     public void openDateDialog(View view)
     {
-
         final DialogPlus dialogPlus = DialogPlus.newDialog(Home.this)
                 .setContentHolder(new ViewHolder(R.layout.custom_date_picker))
                 .setGravity(Gravity.BOTTOM)
-                .setExpanded(true, 1500)
+                .setExpanded(true, 1400)
                 .setCancelable(true)
                 .create();
 
         View dialogView = dialogPlus.getHolderView();
         calendarView = dialogView.findViewById(R.id.materialCalendarView);
+        calenderBackButton = dialogView.findViewById(R.id.calenderbackbutton);
+
+        calenderBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialogPlus.dismiss();
+            }
+        });
+
+        // Manually mark a date for testing
+        //markSpecificDate(calendarView, 2024, 2, 14);
         markTaskDates(calendarView);
 
         dialogPlus.show();
     }
 
+
     private void markTaskDates(CalendarView calendarView) {
+        Log.d("markTaskDates", "Method called");
+
         DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference()
                 .child("users")
                 .child(mAuth.getCurrentUser().getUid())
@@ -154,43 +170,42 @@ public class Home extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<EventDay> events = new ArrayList<>();
 
+                Log.d("markTaskDates", "DataSnapshot children count: " + dataSnapshot.getChildrenCount());
+
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Model task = snapshot.getValue(Model.class);
+                    Log.d("markTaskDates", "Task: " + task);
+
                     if (task != null && task.getDate() != null) {
-
-                        // Assuming the date format is "d/M/yyyy"
-                        String[] dateParts = task.getDate().split("/");
-                        if (dateParts.length == 3) {
-
-                            Toast.makeText(getApplicationContext(),"Entered",Toast.LENGTH_SHORT).show();
-
-                            int dayOfMonth = Integer.parseInt(dateParts[0]);
-                            int month = Integer.parseInt(dateParts[1]) - 1; // Months are 0-indexed
-                            int year = Integer.parseInt(dateParts[2]);
-
+                        String[] dateParts = task.getFullDate().split("/");
+                        if (dateParts.length >= 3) {
                             Calendar calendar = Calendar.getInstance();
-                            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                            calendar.set(Calendar.MONTH, month); // Months are 0-indexed
-                            calendar.set(Calendar.YEAR, year);
 
-                            events.add(new EventDay(calendar, R.drawable.dot, Color.parseColor("#228B22")));
+                            String dd = dateParts[0]; // This is likely causing the issue
+                            String month = dateParts[1];
+                            String year = dateParts[2];
+
+                            calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dd));
+                            calendar.set(Calendar.MONTH, Integer.parseInt(month) - 1);
+                            calendar.set(Calendar.YEAR, Integer.parseInt(year));
+
+                            events.add(new EventDay(calendar, R.drawable.dot));
                         }
                     }
                 }
 
-                // Set events to mark task dates with dots
+                Log.d("markTaskDates", "Events count: " + events.size());
+
+                // Set the events for the calendar view
                 calendarView.setEvents(events);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                // Handle errors
+                Log.e("markTaskDates", "DatabaseError: " + databaseError.getMessage());
             }
         });
     }
-
-
-
 
     protected void onStart() {
         super.onStart();
@@ -229,7 +244,7 @@ public class Home extends AppCompatActivity {
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view,
-                                                    int year, int month, int dayOfMonth) {
+                                                  int year, int month, int dayOfMonth) {
                                 taskdate.setText(dayOfMonth+"/"+(month+1)+"/"+year);
                             }
                         }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
