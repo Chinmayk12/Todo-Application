@@ -3,12 +3,19 @@ package com.example.todoapplication;
 import android.annotation.SuppressLint;
 import com.applandeo.materialcalendarview.CalendarDay;
 
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Calendar;
+
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -47,6 +54,7 @@ import com.orhanobut.dialogplus.ViewHolder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -306,6 +314,7 @@ public class Home extends AppCompatActivity {
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
+                                addAlarmForTask(datetxt, tasktimetxt, tasktitletxt, taskdesctxt);
                                 Toast.makeText(getApplicationContext(),"Data Added",Toast.LENGTH_SHORT).show();
                             }
                         })
@@ -320,6 +329,42 @@ public class Home extends AppCompatActivity {
         });
 
         dialogPlus.show();
+    }
+    private void addAlarmForTask(String date, String time, String title, String description) {
+        try {
+            // Combine date and time strings to create a DateTime object
+            String dateTimeString = date + " " + time;
+            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            Date dateTime = format.parse(dateTimeString);
+
+            // Calculate alarm time
+            Calendar alarmTime = Calendar.getInstance();
+            alarmTime.setTime(dateTime);
+
+            // Subtract 10 minutes from the task time for the alarm time
+            alarmTime.add(Calendar.MINUTE, -10);
+
+            // Create an intent to start the AlarmReceiver class
+            Intent intent = new Intent(getApplicationContext(), MyReceiver.class);
+            intent.putExtra("title", title);
+            intent.putExtra("description", description);
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT |PendingIntent.FLAG_IMMUTABLE);
+
+            // Get the AlarmManager service
+            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+            // Set the alarm to trigger at the calculated alarm time
+            if (alarmManager != null) {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), pendingIntent);
+            }
+
+            // Display a message to indicate that the alarm has been set
+            Toast.makeText(getApplicationContext(), "Alarm set for task: " + title, Toast.LENGTH_SHORT).show();
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
     public void onBackPressed() {
         // Check if DialogPlus is showing and dismiss it

@@ -8,133 +8,131 @@
     app:cardCornerRadius="20dp"
     app:cardElevation="10dp">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="20dp"
-            android:layout_gravity="center"
-            android:src="@drawable/add_task_stymbol"
-            />
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Add a Task"
-            android:layout_marginTop="10dp"
-            android:textAllCaps="true"
-            android:textSize="30sp"
-            android:textStyle="bold"
+            android:orientation="vertical">
 
-            />
-            
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20dp"
-            android:layout_margin="20dp"
-            android:gravity="center"
-            android:text="Fill the details below to add a task into your TODO"
-            />
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:src="@drawable/add_task_stymbol" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:text="Add a Task"
+                android:textAllCaps="true"
+                android:textSize="30sp"
+                android:textStyle="bold"
+
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:gravity="center"
+                android:text="Fill the details below to add a task into your TODO"
+                android:textSize="20dp" />
 
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="Task Title"
-            android:textSize="18dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="Task Title"
+                android:textSize="18dp" />
 
-        <EditText
-            android:id="@+id/tasktitle"
-            android:layout_margin="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="57dp"
-            android:background="@drawable/rounded_edittext_background"
-            android:drawableTint="#673AB7"
-            android:gravity="center"
-            android:hint="Enter Task Title"
-            android:textColor="@color/black"
-            android:textColorHint="@color/black"
-            />
+            <EditText
+                android:id="@+id/tasktitle"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/rounded_edittext_background"
+                android:drawableTint="#673AB7"
+                android:gravity="center"
+                android:hint="Enter Task Title"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="Task Description"
-            android:textSize="18dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="Task Description"
+                android:textSize="18dp" />
 
-        <EditText
-            android:id="@+id/taskdescription"
-            android:layout_margin="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="57dp"
-            android:background="@drawable/rounded_edittext_background"
-            android:drawableTint="#673AB7"
-            android:gravity="center"
-            android:hint="Enter Task Description"
-            android:textColor="@color/black"
-            android:textColorHint="@color/black"
-            />
+            <EditText
+                android:id="@+id/taskdescription"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/rounded_edittext_background"
+                android:drawableTint="#673AB7"
+                android:gravity="center"
+                android:hint="Enter Task Description"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="Task Date"
-            android:textSize="18dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="Task Date"
+                android:textSize="18dp" />
 
-        <EditText
-            android:id="@+id/taskdate"
-            android:layout_margin="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="57dp"
-            android:background="@drawable/rounded_edittext_background"
-            android:drawableStart="@drawable/calender_icon"
-            android:drawableTint="#673AB7"
-            android:gravity="center"
-            android:hint="Enter Task Date"
-            android:inputType="text"
-            android:textColor="@color/black"
-            android:textColorHint="@color/black"
-            />
+            <EditText
+                android:id="@+id/taskdate"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/rounded_edittext_background"
+                android:drawableStart="@drawable/calender_icon"
+                android:drawableTint="#673AB7"
+                android:gravity="center"
+                android:hint="Enter Task Date"
+                android:inputType="text"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="Task Time"
-            android:textSize="18dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="Task Time"
+                android:textSize="18dp" />
 
-        <EditText
-            android:id="@+id/tasktime"
-            android:layout_margin="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="57dp"
-            android:background="@drawable/rounded_edittext_background"
-            android:drawableStart="@drawable/clock_icon"
-            android:drawableTint="#673AB7"
-            android:clickable="true"
-            android:gravity="center"
-            android:hint="Enter Task Time"
-            android:inputType="text"
-            android:textColor="@color/black"
-            android:textColorHint="@color/black"
-            />
+            <EditText
+                android:id="@+id/tasktime"
+                android:layout_width="match_parent"
+                android:layout_height="57dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/rounded_edittext_background"
+                android:clickable="true"
+                android:drawableStart="@drawable/clock_icon"
+                android:drawableTint="#673AB7"
+                android:gravity="center"
+                android:hint="Enter Task Time"
+                android:inputType="text"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black" />
 
-        <Button
-            android:id="@+id/addtask"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Add Task"
-            android:layout_margin="10dp"
-            />
-    </LinearLayout>
+            <Button
+                android:id="@+id/addtask"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="Add Task" />
+        </LinearLayout>
+    </ScrollView>
 
 </androidx.cardview.widget.CardView>

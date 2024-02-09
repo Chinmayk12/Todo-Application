@@ -4,8 +4,10 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -34,8 +36,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
@@ -136,27 +140,50 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
     }
 
     private void completeTodo(View view, String todoid) {
-
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         DatabaseReference todoRef = FirebaseDatabase.getInstance().getReference()
                 .child("users")
-                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .child(currentUserId)
                 .child("todo")
                 .child(todoid);
 
+        // Check if task is already completed
+        todoRef.child("taskstatus").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String taskStatus = snapshot.getValue(String.class);
+                if (taskStatus != null && taskStatus.equals("Done")) {
+                    // Task is already completed, show a message or perform any action
+                    Toast.makeText(view.getContext(), "Task is already completed", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Task is not completed, show completion dialog
+                    showCompletionDialog(view, todoid, todoRef);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle error
+                Toast.makeText(view.getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showCompletionDialog(View view, String todoid, DatabaseReference todoRef) {
         AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
         builder.setTitle("Complete Todo");
         builder.setMessage("Are you sure you want to Complete this Todo?");
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // User clicked Yes, proceed with the deletion
+                // User clicked Yes, proceed with the completion
                 todoRef.child("taskstatus").setValue("Done")
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
                                 // Successfully updated status
+                                showTaskCompleteDialog(view.getContext());
                                 Toast.makeText(view.getContext(), "Task Completed", Toast.LENGTH_SHORT).show();
                             }
                         })
@@ -180,7 +207,47 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         builder.create().show();
     }
 
+    private void showTaskCompleteDialog(Context context) {
+        // Inflate custom dialog layout
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.custom_task_complete, null);
 
+        // Access views in custom layout
+        ImageView taskCompleteImage = dialogView.findViewById(R.id.taskcompleteimage);
+        TextView taskDoneText = dialogView.findViewById(R.id.taskdonetxt);
+        Button taskDoneButton = dialogView.findViewById(R.id.taskdonebtn);
+
+        // Create MediaPlayer instance
+        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.success_sound);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setView(dialogView);
+
+        AlertDialog alertDialog = builder.create();
+
+        taskDoneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Dismiss dialog when Done button is clicked
+                alertDialog.dismiss();
+                // Release MediaPlayer resources
+                mediaPlayer.release();
+            }
+        });
+
+        // Set OnDismissListener to release MediaPlayer resources when the dialog is dismissed
+        alertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                mediaPlayer.release();
+            }
+        });
+
+        // Play the music
+        mediaPlayer.start();
+
+        // Show the dialog
+        alertDialog.show();
+    }
     private void updateTodo(View view, String todoid) {
         final DialogPlus dialogPlus = DialogPlus.newDialog(view.getContext())
                 .setContentHolder(new ViewHolder(R.layout.update_task))
