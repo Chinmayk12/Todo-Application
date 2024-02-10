@@ -346,7 +346,7 @@ public class Home extends AppCompatActivity {
             intent.putExtra("description", description);
             intent.putExtra("datetime",dateTimeString);
 
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT |PendingIntent.FLAG_IMMUTABLE);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1, intent, PendingIntent.FLAG_UPDATE_CURRENT |PendingIntent.FLAG_IMMUTABLE);
 
             // Get the AlarmManager service
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);

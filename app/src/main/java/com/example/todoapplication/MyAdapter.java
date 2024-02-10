@@ -268,6 +268,8 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         // Inflate the layout inside the DialogPlus content view
         final View[] dialogView = {dialogPlus.getHolderView()};
 
+        final String[] oldTime = new String[1];
+
         final String[] selectedStatus = new String[1];
 
         EditText tasktitle = dialogView[0].findViewById(R.id.updatetasktitle);
@@ -275,7 +277,6 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         EditText taskdate = dialogView[0].findViewById(R.id.updatetaskdate);
         EditText tasktime = dialogView[0].findViewById(R.id.updatetasktime);
 
-        String oldtimetxt = tasktime.getText().toString();
 
         String[] statusOptions = {"Pending", "Ongoing"};
         Spinner taskStatus = dialogView[0].findViewById(R.id.spinnerTaskStatus);
@@ -308,6 +309,8 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
             public void onSuccess(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     Model existingModel = dataSnapshot.getValue(Model.class);
+
+                    oldTime[0] = existingModel.getTime();
 
                     // Set the existing data to the corresponding fields in the update dialog
                     tasktitle.setText(existingModel.getTasktitle());
@@ -388,6 +391,8 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
+                                cancelAlarmForTask(getApplicationContext(), todoid, oldTime[0]);
+                                updateAlarmForTask(view,datetxt, tasktimetxt, todoid, tasktitletxt, taskdesctxt);
                                 Toast.makeText(view.getContext(),"Data Updated",Toast.LENGTH_SHORT).show();
                                 dialogPlus.dismiss();
                             }
@@ -403,6 +408,65 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         });
 
         dialogPlus.show();
+    }
+
+
+    private void cancelAlarmForTask(Context context, String todoid, String oldTime) {
+        // Convert the old time string to milliseconds
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        try {
+            Date oldDateTime = format.parse(oldTime);
+            long oldTimeMillis = oldDateTime.getTime();
+
+            // Create an intent for the alarm receiver
+            Intent intent = new Intent(context, MyReceiver.class);
+            //PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT |PendingIntent.FLAG_IMMUTABLE);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1, intent, PendingIntent.FLAG_UPDATE_CURRENT |PendingIntent.FLAG_IMMUTABLE);
+
+            // Get the AlarmManager service and cancel the pending intent
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            if (alarmManager != null) {
+                alarmManager.cancel(pendingIntent);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void updateAlarmForTask(View view,String date, String time, String todoid, String title, String description) {
+        try {
+            // Combine date and time strings to create a DateTime object
+            String dateTimeString = date + " " + time;
+            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            Date dateTime = format.parse(dateTimeString);
+
+            // Calculate alarm time
+            Calendar alarmTime = Calendar.getInstance();
+            alarmTime.setTime(dateTime);
+
+            // Create an intent to start the AlarmReceiver class
+            Intent intent = new Intent(view.getContext(), MyReceiver.class);
+            intent.putExtra("title", title);
+            intent.putExtra("description", description);
+            intent.putExtra("datetime", dateTimeString);
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(view.getContext(), todoid.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+            // Get the AlarmManager service
+            AlarmManager alarmManager = (AlarmManager) view.getContext().getSystemService(Context.ALARM_SERVICE);
+
+            // Set the alarm to trigger at the calculated alarm time
+            if (alarmManager != null) {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), pendingIntent);
+            }
+
+            // Display a message to indicate that the alarm has been set
+            Toast.makeText(view.getContext(), "Alarm set for task: " + title, Toast.LENGTH_SHORT).show();
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     private void deleteTodo(View view, String itemId) {
