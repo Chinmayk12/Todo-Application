@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -16,7 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TodoApplication"
         tools:targetApi="31">
-
+        <activity
+            android:name=".alarm_display_acticity"
+            android:exported="false" />
         <activity
             android:name=".forgotPassword"
             android:exported="false" />
@@ -63,7 +65,7 @@
             android:name="com.facebook.sdk.ClientToken"
             android:value="@string/facebook_client_token" />
 
-        <receiver android:name=".MyReceiver"/>
+        <receiver android:name=".MyReceiver" />
     </application>
 
 </manifest>

@@ -279,7 +279,6 @@ public class Home extends AppCompatActivity {
                         },
                         hour, minute, false  // 24-hour format
                 );
-
                 timePickerDialog.show();
             }
         });
@@ -293,11 +292,11 @@ public class Home extends AppCompatActivity {
                 String datetxt = taskdate.getText().toString();
                 String tasktimetxt = tasktime.getText().toString();
 
-//                // Check if any field is empty
-//                if (studentName.isEmpty() || studentCourse.isEmpty() || studentEmail.isEmpty() || studentImgUrl.isEmpty()) {
-//                    Toast.makeText(getApplicationContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
-//                    return;
-//                }
+                // Check if any field is empty
+                if (tasktitletxt.isEmpty() || taskdesctxt.isEmpty() || datetxt.isEmpty() || tasktimetxt.isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 // Create a Map to represent the data
                 Map<String, Object> newData = new HashMap<>();
@@ -341,13 +340,11 @@ public class Home extends AppCompatActivity {
             Calendar alarmTime = Calendar.getInstance();
             alarmTime.setTime(dateTime);
 
-            // Subtract 10 minutes from the task time for the alarm time
-            alarmTime.add(Calendar.MINUTE, -10);
-
             // Create an intent to start the AlarmReceiver class
             Intent intent = new Intent(getApplicationContext(), MyReceiver.class);
             intent.putExtra("title", title);
             intent.putExtra("description", description);
+            intent.putExtra("datetime",dateTimeString);
 
             PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT |PendingIntent.FLAG_IMMUTABLE);
 

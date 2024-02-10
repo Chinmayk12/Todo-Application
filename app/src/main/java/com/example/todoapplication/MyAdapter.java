@@ -1,14 +1,21 @@
 package com.example.todoapplication;
 
+import static com.facebook.FacebookSdk.getApplicationContext;
+
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.icu.text.SimpleDateFormat;
 import android.media.MediaPlayer;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -43,7 +50,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 
+import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -185,6 +194,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                                 // Successfully updated status
                                 showTaskCompleteDialog(view.getContext());
                                 Toast.makeText(view.getContext(), "Task Completed", Toast.LENGTH_SHORT).show();
+                                notifyDataSetChanged();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -264,6 +274,8 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         EditText taskdesc = dialogView[0].findViewById(R.id.updatetaskdescription);
         EditText taskdate = dialogView[0].findViewById(R.id.updatetaskdate);
         EditText tasktime = dialogView[0].findViewById(R.id.updatetasktime);
+
+        String oldtimetxt = tasktime.getText().toString();
 
         String[] statusOptions = {"Pending", "Ongoing"};
         Spinner taskStatus = dialogView[0].findViewById(R.id.spinnerTaskStatus);
@@ -356,6 +368,11 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                 String datetxt = taskdate.getText().toString().trim();
                 String tasktimetxt = tasktime.getText().toString().trim();
 
+                if (tasktitletxt.isEmpty() || taskdesctxt.isEmpty() || datetxt.isEmpty() || tasktimetxt.isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 updateData.put("tasktitle", tasktitletxt);
                 updateData.put("taskdesc", taskdesctxt);
                 updateData.put("date", datetxt);
@@ -387,7 +404,6 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
 
         dialogPlus.show();
     }
-
 
     private void deleteTodo(View view, String itemId) {
 

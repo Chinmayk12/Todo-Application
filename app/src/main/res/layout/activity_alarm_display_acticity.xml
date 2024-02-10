@@ -10,7 +10,7 @@
         android:layout_height="200dp"
         android:layout_gravity="center"
         android:layout_marginTop="100dp"
-        android:src="@drawable/task_alert" />
+        android:src="@drawable/task_alert"/>
 
     <TextView
         android:id="@+id/alarmtasktitle"
@@ -20,7 +20,6 @@
         android:layout_marginTop="30dp"
         android:textSize="20sp"
         android:gravity="center"
-        android:textColor="@color/black"
         android:textStyle="bold"
         android:layout_gravity="center"
         />
@@ -33,7 +32,7 @@
         android:layout_marginTop="20dp"
         android:gravity="center"
         android:textSize="20sp"
-        android:textColor="@color/black"
+        android:textStyle="bold"
         android:layout_gravity="center"
         />
 
@@ -43,8 +42,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:text="Date : 8/2/2024 , Time : 12:00"
+        android:textStyle="bold"
         android:gravity="center"
-        />    
+        />
+
     <Button
         android:id="@+id/closebtn"
         android:layout_width="match_parent"
