@@ -111,11 +111,13 @@ public class Home extends AppCompatActivity {
     private List<String> taskDates;
     private CalendarView calendarView;
 
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
+
         createNotificationChannel();
 
         username = (TextView) findViewById(R.id.hello);
@@ -186,7 +188,7 @@ public class Home extends AppCompatActivity {
             CharSequence name = "Todo App";
             String description = "Task Description";
             int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel channel = new NotificationChannel("foxandroid",name,importance);
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,name,importance);
             channel.setDescription(description);
 
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
