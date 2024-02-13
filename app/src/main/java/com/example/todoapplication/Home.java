@@ -24,6 +24,7 @@ import android.icu.text.SimpleDateFormat;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -70,6 +71,31 @@ import java.util.Map;
 
 public class Home extends AppCompatActivity {
 
+    // Added This Class For Inconsistency Error Resolving Which I Was Getting When I Goes To Allow Notification For App
+    public class WrapContentLinearLayoutManager extends LinearLayoutManager {
+        public WrapContentLinearLayoutManager(Context context) {
+            super(context);
+        }
+
+        public WrapContentLinearLayoutManager(Context context, int orientation, boolean reverseLayout) {
+            super(context, orientation, reverseLayout);
+        }
+
+        public WrapContentLinearLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+            super(context, attrs, defStyleAttr, defStyleRes);
+        }
+
+        //... constructor
+        @Override
+        public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+            try {
+                super.onLayoutChildren(recycler, state);
+            } catch (IndexOutOfBoundsException e) {
+                Log.e("TAG", "meet a IOOBE in RecyclerView");
+            }
+        }
+    }
+
     private static final String CHANNEL_ID = "My Channel";
     private static final int NOTIFICATION_ID = 101;
 
@@ -102,11 +128,11 @@ public class Home extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         Toast.makeText(getApplicationContext(),"UID:"+mAuth.getCurrentUser().getUid(),Toast.LENGTH_SHORT).show();
 
-//        // Check if the app has notification permission
-//        if (!isNotificationPermissionGranted()) {
-//            // If not granted, request the permission
-//            requestNotificationPermission();
-//        }
+        // Check if the app has notification permission
+        if (!isNotificationPermissionGranted()) {
+            // If not granted, request the permission
+            requestNotificationPermission();
+        }
 
         /*
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); // For name of user
@@ -143,7 +169,7 @@ public class Home extends AppCompatActivity {
         */
 
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
         FirebaseRecyclerOptions<Model> options =
                 new FirebaseRecyclerOptions.Builder<Model>()

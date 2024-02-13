@@ -62,6 +62,11 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
     public MyAdapter(@NonNull FirebaseRecyclerOptions<Model> options) {
         super(options);
     }
+    @Override
+    public int getItemCount() {
+        // Return the total number of items in your data set
+        return super.getItemCount(); // Assuming super class provides item count
+    }
 
     @Override
     protected void onBindViewHolder(@NonNull myViewHolder holder, @SuppressLint("RecyclerView") final int position, @NonNull final Model model) {
@@ -71,7 +76,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
             holder.status.setTextColor(Color.GREEN); // Set your completed color
         } else if ("Ongoing".equals(model.getTaskstatus())) {
             holder.status.setTextColor(Color.rgb(255, 165, 0)); // Orange for Ongoing
-        } else if ("Pending".equals(model.getTaskstatus())){
+        } else if ("Pending".equals(model.getTaskstatus())) {
             holder.status.setTextColor(Color.RED); // Red for pending color
         }
 
@@ -99,6 +104,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.single_row, parent, false);
         return new myViewHolder(view);
     }
+
 
     class myViewHolder extends RecyclerView.ViewHolder {
         TextView day, date, month, tasktitle, taskdesc, time, status;
@@ -258,6 +264,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         // Show the dialog
         alertDialog.show();
     }
+
     private void updateTodo(View view, String todoid) {
         final DialogPlus dialogPlus = DialogPlus.newDialog(view.getContext())
                 .setContentHolder(new ViewHolder(R.layout.update_task))
@@ -392,16 +399,16 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                             @Override
                             public void onSuccess(Void unused) {
                                 cancelAlarmForTask(getApplicationContext(), todoid, oldTime[0]);
-                                updateAlarmForTask(view,datetxt, tasktimetxt, todoid, tasktitletxt, taskdesctxt);
-                                Toast.makeText(view.getContext(),"Data Updated",Toast.LENGTH_SHORT).show();
+                                updateAlarmForTask(view, datetxt, tasktimetxt, todoid, tasktitletxt, taskdesctxt);
+                                Toast.makeText(view.getContext(), "Data Updated", Toast.LENGTH_SHORT).show();
                                 dialogPlus.dismiss();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(view.getContext(),"Error:"+e.getMessage().toString(),Toast.LENGTH_SHORT).show();
-                                Log.d("Error",e.getMessage().toString());
+                                Toast.makeText(view.getContext(), "Error:" + e.getMessage().toString(), Toast.LENGTH_SHORT).show();
+                                Log.d("Error", e.getMessage().toString());
                             }
                         });
             }
@@ -421,7 +428,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
             // Create an intent for the alarm receiver
             Intent intent = new Intent(context, MyReceiver.class);
             //PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT |PendingIntent.FLAG_IMMUTABLE);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1, intent, PendingIntent.FLAG_UPDATE_CURRENT |PendingIntent.FLAG_IMMUTABLE);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
             // Get the AlarmManager service and cancel the pending intent
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -434,7 +441,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
     }
 
 
-    private void updateAlarmForTask(View view,String date, String time, String todoid, String title, String description) {
+    private void updateAlarmForTask(View view, String date, String time, String todoid, String title, String description) {
         try {
             // Combine date and time strings to create a DateTime object
             String dateTimeString = date + " " + time;

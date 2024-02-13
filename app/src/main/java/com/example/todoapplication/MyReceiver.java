@@ -1,18 +1,13 @@
 package com.example.todoapplication;
-
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
-
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import java.util.List;
 
 public class MyReceiver extends BroadcastReceiver {
 
@@ -25,25 +20,40 @@ public class MyReceiver extends BroadcastReceiver {
         String description = intent.getStringExtra("description");
         String datetime = intent.getStringExtra("datetime");
 
-        // Show notification
-        showNotification(context, title, description, datetime);
+        // Check if the app is in the foreground
+        boolean isAppInForeground = isAppInForeground(context);
+
+        if (isAppInForeground) {
+            // If the app is in the foreground, start the alarm activity directly
+            startAlarmActivity(context, title, description, datetime);
+        } else {
+            // If the app is in the background or not running, show a notification
+            showNotification(context, title, description, datetime);
+        }
+    }
+
+    private void startAlarmActivity(Context context, String title, String description, String datetime) {
+        Intent intent = new Intent(context, alarm_display_acticity.class);
+        intent.putExtra("title", title);
+        intent.putExtra("description", description);
+        intent.putExtra("datetime", datetime);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        context.startActivity(intent);
     }
 
     private void showNotification(Context context, String title, String description, String datetime) {
-        // Create an intent to open AlarmDisplayActivity
         Intent intent = new Intent(context, alarm_display_acticity.class);
         intent.putExtra("title", title);
         intent.putExtra("description", description);
         intent.putExtra("datetime", datetime);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-        // Add FLAG_IMMUTABLE flag to PendingIntent
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "foxandroid")
-                .setSmallIcon(R.drawable.calender_icon) // Set a valid small icon here
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.calender_icon)
                 .setContentTitle("Todo App")
-                .setContentText("Title:"+title+"\nDescription:"+description)
+                .setContentText("Title: " + title + "\nDescription: " + description)
                 .setAutoCancel(true)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -61,5 +71,24 @@ public class MyReceiver extends BroadcastReceiver {
             return;
         }
         notificationManagerCompat.notify(NOTIFICATION_ID, builder.build());
+    }
+
+    private boolean isAppInForeground(Context context) {
+        // Get the activity manager
+        android.app.ActivityManager activityManager = (android.app.ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+
+        // Get a list of running app processes
+        List<android.app.ActivityManager.RunningAppProcessInfo> runningAppProcesses = activityManager.getRunningAppProcesses();
+
+        // Check if any of the running app processes belong to the app's package name
+        if (runningAppProcesses != null) {
+            for (android.app.ActivityManager.RunningAppProcessInfo processInfo : runningAppProcesses) {
+                if (processInfo.processName.equals(context.getPackageName()) && processInfo.importance == android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
