@@ -8,15 +8,22 @@ import java.util.Arrays;
 import java.util.Calendar;
 
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -29,6 +36,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -62,6 +70,9 @@ import java.util.Map;
 
 public class Home extends AppCompatActivity {
 
+    private static final String CHANNEL_ID = "My Channel";
+    private static final int NOTIFICATION_ID = 101;
+
     TextView useruid,username;
     Button logoutbtn;
     private FirebaseAuth mAuth;
@@ -79,6 +90,7 @@ public class Home extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
+        createNotificationChannel();
 
         username = (TextView) findViewById(R.id.hello);
 
@@ -89,6 +101,12 @@ public class Home extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         Toast.makeText(getApplicationContext(),"UID:"+mAuth.getCurrentUser().getUid(),Toast.LENGTH_SHORT).show();
+
+//        // Check if the app has notification permission
+//        if (!isNotificationPermissionGranted()) {
+//            // If not granted, request the permission
+//            requestNotificationPermission();
+//        }
 
         /*
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); // For name of user
@@ -136,6 +154,53 @@ public class Home extends AppCompatActivity {
         recyclerView.setAdapter(myAdapter);
 
     }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            CharSequence name = "Todo App";
+            String description = "Task Description";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel("foxandroid",name,importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+
+        }
+    }
+
+    private boolean isNotificationPermissionGranted() {
+        // Check if notification permission is granted
+        return NotificationManagerCompat.from(this).areNotificationsEnabled();
+    }
+
+    private void requestNotificationPermission() {
+        // Display a dialog to the user to request notification permission
+        new AlertDialog.Builder(this)
+                .setTitle("Notification Permission")
+                .setMessage("This app requires notification permission to function properly.")
+                .setPositiveButton("Allow", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Open notification settings to allow the permission
+                        Intent intent = new Intent();
+                        intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                        intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+                        startActivity(intent);
+
+                        //startActivity(new Intent(getApplicationContext(), Home.class));
+                    }
+                })
+                .setNegativeButton("Disallow", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // User disallowed notification permission
+                        // You can handle this situation as needed
+                    }
+                })
+                .show();
+    }
+
 
     public void openDateDialog(View view)
     {

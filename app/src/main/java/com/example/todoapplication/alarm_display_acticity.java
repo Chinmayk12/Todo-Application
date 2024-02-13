@@ -37,7 +37,7 @@ public class alarm_display_acticity extends AppCompatActivity {
         alarmdateandtime.setText(alarmdatetime);
 
 
-        mediaPlayer =  MediaPlayer.create(this, Settings.System.DEFAULT_RINGTONE_URI);
+        mediaPlayer =  MediaPlayer.create(this, R.raw.notification);
         mediaPlayer.start();
 
         // Add functionality for the "Close" button if needed
