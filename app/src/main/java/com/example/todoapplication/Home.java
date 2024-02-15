@@ -71,6 +71,35 @@ import java.util.Map;
 
 public class Home extends AppCompatActivity {
 
+    DialogPlus dialogPlus;
+    public void logoutUser(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+        builder.setTitle("Logout");
+        builder.setMessage("Are you sure you want to log out?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Sign out the current authenticated user from Firebase
+                FirebaseAuth.getInstance().signOut();
+
+                // Clear the entire task stack and start the signup activity as a new task
+                Intent intent = new Intent(getApplicationContext(), signup.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface alertDialog, int which) {
+                // User clicked No, do nothing
+                alertDialog.dismiss();
+            }
+        });
+
+        builder.create().show();
+    }
+
     // Added This Class For Inconsistency Error Resolving Which I Was Getting When I Goes To Allow Notification For App
     public class WrapContentLinearLayoutManager extends LinearLayoutManager {
         public WrapContentLinearLayoutManager(Context context) {
@@ -97,18 +126,15 @@ public class Home extends AppCompatActivity {
     }
 
     private static final String CHANNEL_ID = "My Channel";
-    private static final int NOTIFICATION_ID = 101;
 
     TextView useruid,username;
-    Button logoutbtn;
+
     private FirebaseAuth mAuth;
     private AccessToken accessToken;
     private SharedPreferences sharedPreferences;
     ImageView calender,calenderBackButton;
     RecyclerView recyclerView;
     private MyAdapter myAdapter;
-    DialogPlus dialogPlus;
-    private List<String> taskDates;
     private CalendarView calendarView;
 
 
@@ -320,7 +346,7 @@ public class Home extends AppCompatActivity {
 
     public void addData(View view) {
 
-        final DialogPlus dialogPlus = DialogPlus.newDialog(Home.this)
+         dialogPlus = DialogPlus.newDialog(Home.this)
                 .setContentHolder(new ViewHolder(R.layout.add_task))
                 .setGravity(Gravity.BOTTOM)
                 .setExpanded(true, 2000)
@@ -456,6 +482,7 @@ public class Home extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     public void onBackPressed() {
         // Check if DialogPlus is showing and dismiss it
         if (dialogPlus != null && dialogPlus.isShowing()) {

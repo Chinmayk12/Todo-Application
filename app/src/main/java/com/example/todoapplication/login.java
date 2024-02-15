@@ -233,9 +233,9 @@ public class login extends AppCompatActivity {
     }
 
     private void startHomeActivity() {
-        Intent intent = new Intent(getApplicationContext(), Home.class);
+        //Intent intent = new Intent(getApplicationContext(), Home.class);
         //intent.putExtra("uid", mAuth.getCurrentUser().getUid());
-        startActivity(intent);
-        finish();
+        startActivity(new Intent(getApplicationContext(),Home.class));
+        finishAffinity();
     }
 }

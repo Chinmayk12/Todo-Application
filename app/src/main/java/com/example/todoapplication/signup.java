@@ -119,9 +119,9 @@ public class signup extends AppCompatActivity {
     }
 
     private void startHomeActivity() {
-        Intent intent = new Intent(getApplicationContext(), Home.class);
-        startActivity(intent);
-        finish(); // Finish the current activity to prevent going back to the login screen
+        //Intent intent = new Intent(getApplicationContext(), Home.class);
+        startActivity(new Intent(getApplicationContext(),Home.class));
+        finishAffinity(); // Finish the current activity to prevent going back to the login screen
     }
 
 }

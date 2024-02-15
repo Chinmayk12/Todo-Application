@@ -49,6 +49,16 @@
                 android:layout_alignParentEnd="true"
                 android:onClick="openDateDialog"
                 android:src="@drawable/calendar" />
+
+            <ImageView
+                android:id="@+id/logoutimg"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginTop="15dp"
+                android:onClick="logoutUser"
+                android:layout_below="@+id/calenderimg"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/logout_icon" />
         </RelativeLayout>
 
     </androidx.cardview.widget.CardView>
