@@ -417,7 +417,6 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         dialogPlus.show();
     }
 
-
     private void cancelAlarmForTask(Context context, String todoid, String oldTime) {
         // Convert the old time string to milliseconds
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
@@ -425,18 +424,23 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
             Date oldDateTime = format.parse(oldTime);
             long oldTimeMillis = oldDateTime.getTime();
 
+            Log.d("CancelAlarmForTask", "Old time in milliseconds: " + oldTimeMillis);
+
             // Create an intent for the alarm receiver
             Intent intent = new Intent(context, MyReceiver.class);
-            //PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT |PendingIntent.FLAG_IMMUTABLE);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Log.d("CancelAlarmForTask", "PendingIntent created");
 
             // Get the AlarmManager service and cancel the pending intent
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             if (alarmManager != null) {
                 alarmManager.cancel(pendingIntent);
+                Log.d("CancelAlarmForTask", "Alarm cancelled");
             }
         } catch (ParseException e) {
             e.printStackTrace();
+            Log.e("CancelAlarmForTask", "Error parsing old time: " + oldTime);
         }
     }
 
@@ -458,7 +462,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
             intent.putExtra("description", description);
             intent.putExtra("datetime", dateTimeString);
 
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(view.getContext(), todoid.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(view.getContext(),1, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
             // Get the AlarmManager service
             AlarmManager alarmManager = (AlarmManager) view.getContext().getSystemService(Context.ALARM_SERVICE);

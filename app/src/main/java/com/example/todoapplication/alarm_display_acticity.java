@@ -25,7 +25,7 @@ public class alarm_display_acticity extends AppCompatActivity {
         String description = getIntent().getStringExtra("description");
         String alarmdatetime = getIntent().getStringExtra("datetime");
 
-        Toast.makeText(getApplicationContext(),title+":"+description,Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(),title+":"+description,Toast.LENGTH_SHORT).show();
 
         // Display task details in TextViews or other UI elements
         titleTextView = findViewById(R.id.alarmtasktitle);
