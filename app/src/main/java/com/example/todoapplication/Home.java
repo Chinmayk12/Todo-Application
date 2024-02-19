@@ -1,16 +1,10 @@
 package com.example.todoapplication;
-
 import android.annotation.SuppressLint;
-import com.applandeo.materialcalendarview.CalendarDay;
-
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Calendar;
-
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -19,7 +13,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,11 +20,13 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -40,12 +35,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.applandeo.materialcalendarview.CalendarDay;
 import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
-import com.applandeo.materialcalendarview.listeners.OnCalendarPageChangeListener;
-import com.applandeo.materialcalendarview.utils.DateUtils;
 import com.facebook.AccessToken;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -59,10 +50,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
-
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -70,8 +58,8 @@ import java.util.Locale;
 import java.util.Map;
 
 public class Home extends AppCompatActivity {
-
     DialogPlus dialogPlus;
+
     public void logoutUser(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
         builder.setTitle("Logout");
@@ -127,15 +115,16 @@ public class Home extends AppCompatActivity {
 
     private static final String CHANNEL_ID = "My Channel";
 
-    TextView useruid,username;
+    TextView useruid, username;
 
     private FirebaseAuth mAuth;
     private AccessToken accessToken;
     private SharedPreferences sharedPreferences;
-    ImageView calender,calenderBackButton;
+    ImageView calender, calenderBackButton;
     RecyclerView recyclerView;
     private MyAdapter myAdapter;
     private CalendarView calendarView;
+    PopupMenu popupMenu;
 
 
     @SuppressLint("MissingInflatedId")
@@ -151,10 +140,10 @@ public class Home extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         String usernametxt = user.getDisplayName();
-        username.setText("Hello "+usernametxt);
+        username.setText("Hello " + usernametxt);
 
         mAuth = FirebaseAuth.getInstance();
-        Toast.makeText(getApplicationContext(),"UID:"+mAuth.getCurrentUser().getUid(),Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "UID:" + mAuth.getCurrentUser().getUid(), Toast.LENGTH_SHORT).show();
 
         // Check if the app has notification permission
         if (!isNotificationPermissionGranted()) {
@@ -201,7 +190,7 @@ public class Home extends AppCompatActivity {
 
         FirebaseRecyclerOptions<Model> options =
                 new FirebaseRecyclerOptions.Builder<Model>()
-                        .setQuery(FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo"),Model.class)
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo"), Model.class)
                         .build();
 
         myAdapter = new MyAdapter(options);
@@ -210,11 +199,11 @@ public class Home extends AppCompatActivity {
     }
 
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Todo App";
             String description = "Task Description";
             int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,name,importance);
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
 
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
@@ -256,8 +245,7 @@ public class Home extends AppCompatActivity {
     }
 
 
-    public void openDateDialog(View view)
-    {
+    public void openDateDialog(View view) {
         final DialogPlus dialogPlus = DialogPlus.newDialog(Home.this)
                 .setContentHolder(new ViewHolder(R.layout.custom_date_picker))
                 .setGravity(Gravity.BOTTOM)
@@ -338,6 +326,7 @@ public class Home extends AppCompatActivity {
         super.onStart();
         myAdapter.startListening();
     }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -346,7 +335,7 @@ public class Home extends AppCompatActivity {
 
     public void addData(View view) {
 
-         dialogPlus = DialogPlus.newDialog(Home.this)
+        dialogPlus = DialogPlus.newDialog(Home.this)
                 .setContentHolder(new ViewHolder(R.layout.add_task))
                 .setGravity(Gravity.BOTTOM)
                 .setExpanded(true, 2000)
@@ -372,7 +361,7 @@ public class Home extends AppCompatActivity {
                             @Override
                             public void onDateSet(DatePicker view,
                                                   int year, int month, int dayOfMonth) {
-                                taskdate.setText(dayOfMonth+"/"+(month+1)+"/"+year);
+                                taskdate.setText(dayOfMonth + "/" + (month + 1) + "/" + year);
                             }
                         }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
                 dialog.show();
@@ -426,20 +415,21 @@ public class Home extends AppCompatActivity {
                 newData.put("time", tasktimetxt);
                 newData.put("taskstatus", "Pending");
 
-                String uniqueKey  = FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo").push().getKey();;
+                String uniqueKey = FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo").push().getKey();
+                ;
 
                 FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo").child(uniqueKey).setValue(newData)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
                                 addAlarmForTask(datetxt, tasktimetxt, tasktitletxt, taskdesctxt);
-                                Toast.makeText(getApplicationContext(),"Data Added",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "Data Added", Toast.LENGTH_SHORT).show();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(getApplicationContext(),"Error While Adding Data",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "Error While Adding Data", Toast.LENGTH_SHORT).show();
                             }
                         });
 
@@ -448,6 +438,7 @@ public class Home extends AppCompatActivity {
 
         dialogPlus.show();
     }
+
     private void addAlarmForTask(String date, String time, String title, String description) {
         try {
             // Combine date and time strings to create a DateTime object
@@ -463,9 +454,9 @@ public class Home extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), MyReceiver.class);
             intent.putExtra("title", title);
             intent.putExtra("description", description);
-            intent.putExtra("datetime",dateTimeString);
+            intent.putExtra("datetime", dateTimeString);
 
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1, intent, PendingIntent.FLAG_UPDATE_CURRENT |PendingIntent.FLAG_IMMUTABLE);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
             // Get the AlarmManager service
             AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -483,10 +474,36 @@ public class Home extends AppCompatActivity {
         }
     }
 
+    public void toolbarmenu(View view) {
+        PopupMenu popupMenu = new PopupMenu(view.getContext(), view);
+        popupMenu.getMenuInflater().inflate(R.menu.nav_menu_options, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @SuppressLint("NonConstantResourceId")
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                int id = menuItem.getItemId();
+
+                if (id == R.id.aboutus) {
+                    //Toast.makeText(view.getContext(), "About Us", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(getApplicationContext(), about_us.class));
+                } else if (id == R.id.logoutuser) {
+                    //Toast.makeText(view.getContext(), "Log out", Toast.LENGTH_SHORT).show();
+                    logoutUser(view);
+                }
+                return true;
+            }
+
+        });
+
+        popupMenu.show();
+    }
+
+
     public void onBackPressed() {
         // Check if DialogPlus is showing and dismiss it
         if (dialogPlus != null && dialogPlus.isShowing()) {
-            Log.d("Back Button Clicked ?","Yes ");
+            Log.d("Back Button Clicked ?", "Yes ");
             dialogPlus.dismiss();
         } else {
             // If DialogPlus is not showing, proceed with the default behavior

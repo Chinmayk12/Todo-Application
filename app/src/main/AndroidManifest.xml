@@ -18,6 +18,9 @@
         android:theme="@style/Theme.TodoApplication"
         tools:targetApi="31">
         <activity
+            android:name=".about_us"
+            android:exported="false" />
+        <activity
             android:name=".alarm_display_acticity"
             android:exported="false" />
         <activity
@@ -74,7 +77,6 @@
                 <action android:name="com.example.todoapplication.NOTIFICATION_ALARM" />
             </intent-filter>
         </receiver>
-
     </application>
 
 </manifest>

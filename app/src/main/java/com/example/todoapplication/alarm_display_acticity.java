@@ -2,19 +2,23 @@ package com.example.todoapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class alarm_display_acticity extends AppCompatActivity {
 
     MediaPlayer mediaPlayer;
+    ImageView backbtn;
     TextView titleTextView,descriptionTextView,alarmdateandtime;
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +35,7 @@ public class alarm_display_acticity extends AppCompatActivity {
         titleTextView = findViewById(R.id.alarmtasktitle);
         descriptionTextView = findViewById(R.id.alarmtaskdescription);
         alarmdateandtime = findViewById(R.id.alarmdateandtime);
+        backbtn = findViewById(R.id.backBtn);
 
         titleTextView.setText(title);
         descriptionTextView.setText(description);
@@ -50,6 +55,17 @@ public class alarm_display_acticity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(),Home.class));
                 finishAffinity();
             }
+
         });
+
+        backbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mediaPlayer.stop();
+                startActivity(new Intent(getApplicationContext(),Home.class));
+                finishAffinity();
+            }
+        });
+
     }
 }

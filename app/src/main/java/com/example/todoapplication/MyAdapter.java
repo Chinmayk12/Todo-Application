@@ -491,23 +491,43 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // User clicked Yes, proceed with the deletion
-                FirebaseDatabase.getInstance().getReference().child("users")
-                        .child(currentUserId).child("todo").child(itemId)
-                        .removeValue()
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                //Toast.makeText(view.getContext(), "Item Id = " + itemId, Toast.LENGTH_SHORT).show();
-                                Toast.makeText(view.getContext(), "Todo deleted successfully", Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e("MyAdapter", "Error deleting todo", e);
-                                Toast.makeText(view.getContext(), "Error deleting todo", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                DatabaseReference todoRef = FirebaseDatabase.getInstance().getReference().child("users")
+                        .child(currentUserId).child("todo").child(itemId);
+
+                todoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            Model model = snapshot.getValue(Model.class);
+                            String oldTimeDelete = model.getTime();
+
+                            todoRef.removeValue()
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            //Toast.makeText(view.getContext(), "Item Id = " + itemId, Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(view.getContext(), "Todo deleted successfully", Toast.LENGTH_SHORT).show();
+                                            cancelAlarmForTask(view.getContext(), itemId, oldTimeDelete);
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.e("MyAdapter", "Error deleting todo", e);
+                                            Toast.makeText(view.getContext(), "Error deleting todo", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        } else {
+                            Toast.makeText(view.getContext(), "Todo not found", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e("MyAdapter", "Error reading todo", error.toException());
+                        Toast.makeText(view.getContext(), "Error reading todo", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
