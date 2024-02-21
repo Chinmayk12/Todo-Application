@@ -398,6 +398,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
+                                Toast.makeText(view.getContext(),oldTime[0],Toast.LENGTH_SHORT).show();
                                 cancelAlarmForTask(getApplicationContext(), todoid, oldTime[0]);
                                 updateAlarmForTask(view, datetxt, tasktimetxt, todoid, tasktitletxt, taskdesctxt);
                                 Toast.makeText(view.getContext(), "Data Updated", Toast.LENGTH_SHORT).show();
@@ -417,32 +418,6 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         dialogPlus.show();
     }
 
-    private void cancelAlarmForTask(Context context, String todoid, String oldTime) {
-        // Convert the old time string to milliseconds
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-        try {
-            Date oldDateTime = format.parse(oldTime);
-            long oldTimeMillis = oldDateTime.getTime();
-
-            Log.d("CancelAlarmForTask", "Old time in milliseconds: " + oldTimeMillis);
-
-            // Create an intent for the alarm receiver
-            Intent intent = new Intent(context, MyReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            Log.d("CancelAlarmForTask", "PendingIntent created");
-
-            // Get the AlarmManager service and cancel the pending intent
-            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            if (alarmManager != null) {
-                alarmManager.cancel(pendingIntent);
-                Log.d("CancelAlarmForTask", "Alarm cancelled");
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-            Log.e("CancelAlarmForTask", "Error parsing old time: " + oldTime);
-        }
-    }
 
 
     private void updateAlarmForTask(View view, String date, String time, String todoid, String title, String description) {
@@ -480,8 +455,39 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         }
     }
 
-    private void deleteTodo(View view, String itemId) {
+    private void cancelAlarmForTask(Context context, String todoid, String oldTime) {
+        // Convert the old time string to milliseconds
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        try {
+            Date oldDateTime = format.parse(oldTime);
+            long oldTimeMillis = oldDateTime.getTime();
 
+            Log.d("CancelAlarmForTask", "Old time in milliseconds: " + oldTimeMillis);
+
+            // Create an intent for the alarm receiver
+            Intent intent = new Intent(context, MyReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Log.d("CancelAlarmForTask", "PendingIntent created");
+
+            // Get the AlarmManager service and cancel the pending intent
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            if (alarmManager != null) {
+                Toast.makeText(context,"Alarm Cancelled",Toast.LENGTH_SHORT).show();
+                alarmManager.cancel(pendingIntent);
+                Log.d("CancelAlarmForTask", "Alarm cancelled");
+            }
+            else
+            {
+                Toast.makeText(context,"Null alarm",Toast.LENGTH_SHORT).show();
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+            Log.e("CancelAlarmForTask", "Error parsing old time: " + oldTime);
+        }
+    }
+
+    private void deleteTodo(View view, String itemId) {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
@@ -490,7 +496,6 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // User clicked Yes, proceed with the deletion
                 DatabaseReference todoRef = FirebaseDatabase.getInstance().getReference().child("users")
                         .child(currentUserId).child("todo").child(itemId);
 
@@ -499,15 +504,17 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.exists()) {
                             Model model = snapshot.getValue(Model.class);
-                            String oldTimeDelete = model.getTime();
+                             String oldTime = model.getTime();
+
+
 
                             todoRef.removeValue()
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void aVoid) {
-                                            //Toast.makeText(view.getContext(), "Item Id = " + itemId, Toast.LENGTH_SHORT).show();
                                             Toast.makeText(view.getContext(), "Todo deleted successfully", Toast.LENGTH_SHORT).show();
-                                            cancelAlarmForTask(view.getContext(), itemId, oldTimeDelete);
+                                            Toast.makeText(view.getContext(), oldTime,Toast.LENGTH_SHORT).show();
+                                            cancelAlarmForTask(view.getContext(), itemId, oldTime);
                                         }
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
@@ -533,7 +540,6 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface alertDialog, int which) {
-                // User clicked No, do nothing
                 alertDialog.dismiss();
             }
         });

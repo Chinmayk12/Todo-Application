@@ -126,7 +126,6 @@ public class Home extends AppCompatActivity {
     private CalendarView calendarView;
     PopupMenu popupMenu;
 
-
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
