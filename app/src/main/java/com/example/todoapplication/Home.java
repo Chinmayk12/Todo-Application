@@ -57,6 +57,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import pl.droidsonroids.gif.GifImageView;
+
 public class Home extends AppCompatActivity {
     DialogPlus dialogPlus;
 
@@ -124,6 +126,7 @@ public class Home extends AppCompatActivity {
     RecyclerView recyclerView;
     private MyAdapter myAdapter;
     private CalendarView calendarView;
+    GifImageView noTasksImageView;
     PopupMenu popupMenu;
 
     @SuppressLint("MissingInflatedId")
@@ -135,6 +138,8 @@ public class Home extends AppCompatActivity {
         createNotificationChannel();
 
         username = (TextView) findViewById(R.id.hello);
+        noTasksImageView = findViewById(R.id.noTasksImageView);
+        noTasksImageView.setVisibility(View.GONE);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -192,9 +197,35 @@ public class Home extends AppCompatActivity {
                         .setQuery(FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo"), Model.class)
                         .build();
 
-        myAdapter = new MyAdapter(options);
+        myAdapter = new MyAdapter(options,this);
         recyclerView.setAdapter(myAdapter);
 
+        checkTasksExistence();
+
+
+    }
+
+    private void checkTasksExistence() {
+        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference()
+                .child("users")
+                .child(mAuth.getCurrentUser().getUid())
+                .child("todo");
+
+        databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    noTasksImageView.setVisibility(View.GONE);
+                } else {
+                    noTasksImageView.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("checkTasksExistence", "DatabaseError: " + databaseError.getMessage());
+            }
+        });
     }
 
     private void createNotificationChannel() {
@@ -324,12 +355,18 @@ public class Home extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         myAdapter.startListening();
+        checkTasksExistence(); // Update visibility when the activity starts
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         myAdapter.stopListening();
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        checkTasksExistence();
     }
 
     public void addData(View view) {
@@ -423,6 +460,7 @@ public class Home extends AppCompatActivity {
                             public void onSuccess(Void unused) {
                                 addAlarmForTask(datetxt, tasktimetxt, tasktitletxt, taskdesctxt);
                                 Toast.makeText(getApplicationContext(), "Data Added", Toast.LENGTH_SHORT).show();
+                                checkTasksExistence();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {

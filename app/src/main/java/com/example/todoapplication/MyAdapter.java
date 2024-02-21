@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.icu.text.SimpleDateFormat;
+import android.media.Image;
 import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.Display;
@@ -57,15 +58,16 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import pl.droidsonroids.gif.GifDecoder;
+import pl.droidsonroids.gif.GifImageView;
+
 public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHolder> {
 
-    public MyAdapter(@NonNull FirebaseRecyclerOptions<Model> options) {
+    private Context mContext;
+    GifImageView noTaskImageView;
+    public MyAdapter(@NonNull FirebaseRecyclerOptions<Model> options, Context context) {
         super(options);
-    }
-    @Override
-    public int getItemCount() {
-        // Return the total number of items in your data set
-        return super.getItemCount(); // Assuming super class provides item count
+        this.mContext = context;
     }
 
     @Override
@@ -88,6 +90,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         holder.time.setText(model.getTime());
         holder.status.setText(model.getTaskstatus());
 
+        noTaskImageView = ((Home) mContext).findViewById(R.id.noTasksImageView);
 
         holder.moreoptions.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -507,7 +510,6 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                              String oldTime = model.getTime();
 
 
-
                             todoRef.removeValue()
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
@@ -515,7 +517,9 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                                             Toast.makeText(view.getContext(), "Todo deleted successfully", Toast.LENGTH_SHORT).show();
                                             Toast.makeText(view.getContext(), oldTime,Toast.LENGTH_SHORT).show();
                                             cancelAlarmForTask(view.getContext(), itemId, oldTime);
+                                            checkTasksExistence();
                                         }
+
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
@@ -546,5 +550,14 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
 
         builder.create().show();
     }
+
+    private void checkTasksExistence() {
+        if (getItemCount() == 0) {
+            noTaskImageView.setVisibility(View.VISIBLE);
+        } else {
+            noTaskImageView.setVisibility(View.GONE);
+        }
+    }
+
 
 }
