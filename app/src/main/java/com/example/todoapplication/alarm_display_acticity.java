@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
@@ -18,11 +20,19 @@ public class alarm_display_acticity extends AppCompatActivity {
     MediaPlayer mediaPlayer;
     ImageView backbtn;
     TextView titleTextView,descriptionTextView,alarmdateandtime;
+    private NetworkChangeReceiver networkChangeReceiver;
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alarm_display_acticity);
+
+        // For Network Connectivity Checking
+        networkChangeReceiver = new NetworkChangeReceiver();
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkChangeReceiver, filter);
+
 
         // Retrieve task details from the intent
         String title = getIntent().getStringExtra("title");
@@ -67,5 +77,10 @@ public class alarm_display_acticity extends AppCompatActivity {
             }
         });
 
+    }
+
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(networkChangeReceiver);
     }
 }

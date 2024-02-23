@@ -2,8 +2,10 @@ package com.example.todoapplication;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -52,11 +54,18 @@ public class login extends AppCompatActivity {
     private BeginSignInRequest signInRequest;
     private SignInClient oneTapClient;
     private CallbackManager callbackManager;
+    private NetworkChangeReceiver networkChangeReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
+
+        // For Network Connectivity Checking
+        networkChangeReceiver = new NetworkChangeReceiver();
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkChangeReceiver, filter);
+
 
         email = findViewById(R.id.username);
         password = findViewById(R.id.signuppassword);
@@ -231,5 +240,10 @@ public class login extends AppCompatActivity {
         //intent.putExtra("uid", mAuth.getCurrentUser().getUid());
         startActivity(new Intent(getApplicationContext(),Home.class));
         finishAffinity();
+    }
+
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(networkChangeReceiver);
     }
 }

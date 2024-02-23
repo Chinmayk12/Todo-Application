@@ -3,7 +3,9 @@ package com.example.todoapplication;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -29,12 +31,19 @@ public class signup extends AppCompatActivity {
     Button signup;
     TextView aldlogin;
     private FirebaseAuth mAuth;
+    private NetworkChangeReceiver networkChangeReceiver;
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.signup_page);
+
+        // For Network Connectivity Checking
+        networkChangeReceiver = new NetworkChangeReceiver();
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkChangeReceiver, filter);
+
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -126,6 +135,11 @@ public class signup extends AppCompatActivity {
         //Intent intent = new Intent(getApplicationContext(), Home.class);
         startActivity(new Intent(getApplicationContext(),Home.class));
         finishAffinity(); // Finish the current activity to prevent going back to the login screen
+    }
+
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(networkChangeReceiver);
     }
 
 }

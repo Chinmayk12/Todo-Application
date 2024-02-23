@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
@@ -21,12 +23,19 @@ public class forgotPassword extends AppCompatActivity {
 
     EditText forgotPasswordEmail;
     Button forgotPassword;
+    private NetworkChangeReceiver networkChangeReceiver;
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgot_password);
+
+        // For Network Connectivity Checking
+        networkChangeReceiver = new NetworkChangeReceiver();
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkChangeReceiver, filter);
+
 
         forgotPasswordEmail = (EditText) findViewById(R.id.forgotpasswordemail);
         forgotPassword = (Button) findViewById(R.id.forgotpasswordbtn);
@@ -72,5 +81,9 @@ public class forgotPassword extends AppCompatActivity {
                 }
             }
         });
+    }
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(networkChangeReceiver);
     }
 }

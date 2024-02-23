@@ -20,8 +20,10 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.icu.text.SimpleDateFormat;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,8 +50,6 @@ import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
 import com.facebook.AccessToken;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -72,34 +72,6 @@ import pl.droidsonroids.gif.GifImageView;
 
 public class Home extends AppCompatActivity {
     DialogPlus dialogPlus;
-    public void logoutUser(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-        builder.setTitle("Logout");
-        builder.setMessage("Are you sure you want to log out?");
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // Sign out the current authenticated user from Firebase
-                FirebaseAuth.getInstance().signOut();
-
-                // Clear the entire task stack and start the signup activity as a new task
-                Intent intent = new Intent(getApplicationContext(), signup.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
-            }
-        });
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface alertDialog, int which) {
-                // User clicked No, do nothing
-                alertDialog.dismiss();
-            }
-        });
-
-        builder.create().show();
-    }
-
 
     // Added This Class For Inconsistency Error Resolving Which I Was Getting When I Goes To Allow Notification For App
     public class WrapContentLinearLayoutManager extends LinearLayoutManager {
@@ -127,24 +99,25 @@ public class Home extends AppCompatActivity {
     }
 
     private static final String CHANNEL_ID = "My Channel";
-
-    TextView useruid, username;
-
+    TextView  username;
     private FirebaseAuth mAuth;
-    private AccessToken accessToken;
-    private SharedPreferences sharedPreferences;
-    ImageView calender, calenderBackButton;
+    ImageView calenderBackButton;
     RecyclerView recyclerView;
     private MyAdapter myAdapter;
     private CalendarView calendarView;
     GifImageView noTasksImageView;
-    PopupMenu popupMenu;
+    private NetworkChangeReceiver networkChangeReceiver;
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
+
+        // For Network Connectivity Checking
+        networkChangeReceiver = new NetworkChangeReceiver();
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkChangeReceiver, filter);
 
         mAuth = FirebaseAuth.getInstance();
        //Toast.makeText(getApplicationContext(), "UID:" + mAuth.getCurrentUser().getUid(), Toast.LENGTH_SHORT).show();
@@ -171,9 +144,7 @@ public class Home extends AppCompatActivity {
         myAdapter = new MyAdapter(options,this);
         recyclerView.setAdapter(myAdapter);
 
-
         checkTasksExistence();
-
 
         // Check if the app has notification permission
         if (!isNotificationPermissionGranted()) {
@@ -521,6 +492,34 @@ public class Home extends AppCompatActivity {
         popupMenu.show();
     }
 
+    public void logoutUser(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+        builder.setTitle("Logout");
+        builder.setMessage("Are you sure you want to log out?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Sign out the current authenticated user from Firebase
+                FirebaseAuth.getInstance().signOut();
+
+                // Clear the entire task stack and start the signup activity as a new task
+                Intent intent = new Intent(getApplicationContext(), signup.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface alertDialog, int which) {
+                // User clicked No, do nothing
+                alertDialog.dismiss();
+            }
+        });
+
+        builder.create().show();
+    }
+
     protected void onStart() {
         super.onStart();
         myAdapter.startListening();
@@ -531,6 +530,11 @@ public class Home extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         myAdapter.stopListening();
+    }
+
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(networkChangeReceiver);
     }
     public void onBackPressed() {
         // Check if DialogPlus is showing and dismiss it
