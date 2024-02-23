@@ -58,9 +58,12 @@ public class signup extends AppCompatActivity {
                 passwordtxt = password.getText().toString();
                 usernametxt = username.getText().toString();
 
-                if ((emailtxt.isEmpty() && passwordtxt.isEmpty()) || (emailtxt.isEmpty() || passwordtxt.isEmpty()) || (usernametxt.isEmpty() || usernametxt.isEmpty()))
+                if((emailtxt.isEmpty() && passwordtxt.isEmpty()) || (emailtxt.isEmpty() || passwordtxt.isEmpty()) || (usernametxt.isEmpty() || usernametxt.isEmpty()))
                 {
                     Toast.makeText(getApplicationContext(), "Empty Field.", Toast.LENGTH_SHORT).show();
+                }
+                else if (passwordtxt.length() < 6) {
+                    Toast.makeText(getApplicationContext(), "Password must be at least 6 characters long.", Toast.LENGTH_SHORT).show();
                 }
                 else
                 {
@@ -98,11 +101,12 @@ public class signup extends AppCompatActivity {
 
 
                                         Toast.makeText(getApplicationContext(), "User Registed Successfully", Toast.LENGTH_LONG).show();
-
                                         startActivity(new Intent(signup.this, login.class));
+
                                     } else {
-                                        Toast.makeText(getApplicationContext(), "AN Error Occured", Toast.LENGTH_LONG).show();
-                                        Log.d("Error:",task.getException().toString());
+                                        // User registration failed
+                                        Toast.makeText(getApplicationContext(), "An error occurred: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                        Log.e("Signup Error", "Error creating user", task.getException());
                                     }
                                 }
                             });

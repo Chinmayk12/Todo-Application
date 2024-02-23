@@ -15,11 +15,13 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.SignInMethodQueryResult;
 
 public class forgotPassword extends AppCompatActivity {
 
     EditText forgotPasswordEmail;
     Button forgotPassword;
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,23 +37,35 @@ public class forgotPassword extends AppCompatActivity {
                 FirebaseAuth auth = FirebaseAuth.getInstance();
                 String emailAddress = forgotPasswordEmail.getText().toString();
 
-                if(emailAddress.isEmpty())
-                {
-                    Toast.makeText(getApplicationContext(),"Empty Field",Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-                    auth.sendPasswordResetEmail(emailAddress)
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                if (emailAddress.isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "Empty Field", Toast.LENGTH_SHORT).show();
+                } else {
+                    auth.fetchSignInMethodsForEmail(emailAddress)
+                            .addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>() {
                                 @Override
-                                public void onComplete(@NonNull Task<Void> task) {
+                                public void onComplete(@NonNull Task<SignInMethodQueryResult> task) {
                                     if (task.isSuccessful()) {
-                                        Toast.makeText(getApplicationContext(),"Check Email To Reset Password.",Toast.LENGTH_SHORT).show();
-                                        startActivity(new Intent(getApplicationContext(),login.class));
-                                    }
-                                    else
-                                    {
-                                        Toast.makeText(getApplicationContext(),"Error:"+task.getException().getMessage(),Toast.LENGTH_LONG).show();
+                                        SignInMethodQueryResult result = task.getResult();
+                                        if (result.getSignInMethods().isEmpty()) {
+                                            // No sign-in methods found, email doesn't exist
+                                            Toast.makeText(getApplicationContext(), "Email does not exist.", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            // Email exists, send password reset email
+                                            auth.sendPasswordResetEmail(emailAddress)
+                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                Toast.makeText(getApplicationContext(), "Check Email To Reset Password.", Toast.LENGTH_SHORT).show();
+                                                                startActivity(new Intent(getApplicationContext(), login.class));
+                                                            } else {
+                                                                Toast.makeText(getApplicationContext(), "Error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                                            }
+                                                        }
+                                                    });
+                                        }
+                                    } else {
+                                        Toast.makeText(getApplicationContext(), "Error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                                     }
                                 }
                             });

@@ -3,4 +3,6 @@
     <string name="facebook_app_id">727579826110633</string>
     <string name="fb_login_protocol_scheme">727579826110633</string>
     <string name="facebook_client_token">af35055c849e2bf92e3a1f396123958c</string>
+    <string name="admob_app_id">ca-app-pub-7387336704968294~8212786454</string>
+    <string name="ad_unit_id">ca-app-pub-7387336704968294/9921222433</string>
 </resources>

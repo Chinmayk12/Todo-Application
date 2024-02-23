@@ -66,12 +66,6 @@ public class login extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        // Check if the user is already authenticated
-        if (mAuth.getCurrentUser() != null) {
-            // User is already logged in, start Home activity
-            startHomeActivity();
-        }
-
         forgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

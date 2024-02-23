@@ -1,4 +1,12 @@
 package com.example.todoapplication;
+
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import android.annotation.SuppressLint;
 import java.text.ParseException;
 import java.util.Calendar;
@@ -16,6 +24,7 @@ import android.content.SharedPreferences;
 import android.icu.text.SimpleDateFormat;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -39,6 +48,8 @@ import com.applandeo.materialcalendarview.CalendarView;
 import com.applandeo.materialcalendarview.EventDay;
 import com.facebook.AccessToken;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -90,6 +101,7 @@ public class Home extends AppCompatActivity {
         builder.create().show();
     }
 
+
     // Added This Class For Inconsistency Error Resolving Which I Was Getting When I Goes To Allow Notification For App
     public class WrapContentLinearLayoutManager extends LinearLayoutManager {
         public WrapContentLinearLayoutManager(Context context) {
@@ -135,19 +147,34 @@ public class Home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
 
-        createNotificationChannel();
+        mAuth = FirebaseAuth.getInstance();
+        Toast.makeText(getApplicationContext(), "UID:" + mAuth.getCurrentUser().getUid(), Toast.LENGTH_SHORT).show();
 
         username = (TextView) findViewById(R.id.hello);
         noTasksImageView = findViewById(R.id.noTasksImageView);
         noTasksImageView.setVisibility(View.GONE);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        // For Creating Notification Channel If The Mobile Version is grater than 11
+        createNotificationChannel();
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();    // For name of user
         String usernametxt = user.getDisplayName();
         username.setText("Hello " + usernametxt);
 
-        mAuth = FirebaseAuth.getInstance();
-        Toast.makeText(getApplicationContext(), "UID:" + mAuth.getCurrentUser().getUid(), Toast.LENGTH_SHORT).show();
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+
+        FirebaseRecyclerOptions<Model> options =
+                new FirebaseRecyclerOptions.Builder<Model>()
+                        .setQuery(FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo"), Model.class)
+                        .build();
+
+        myAdapter = new MyAdapter(options,this);
+        recyclerView.setAdapter(myAdapter);
+
+
+        checkTasksExistence();
+
 
         // Check if the app has notification permission
         if (!isNotificationPermissionGranted()) {
@@ -172,60 +199,36 @@ public class Home extends AppCompatActivity {
         useruid.setText("UID = " + mAuth.getCurrentUser().getUid());
         */
 
-
-        /*
-        logoutbtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Sign out the current authenticated user from Firebase
-                FirebaseAuth.getInstance().signOut();
-
-                // Clear the entire task stack and start the signup activity as a new task
-                Intent intent = new Intent(getApplicationContext(), signup.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
-            }
-        });
-        */
-
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-
-        FirebaseRecyclerOptions<Model> options =
-                new FirebaseRecyclerOptions.Builder<Model>()
-                        .setQuery(FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo"), Model.class)
-                        .build();
-
-        myAdapter = new MyAdapter(options,this);
-        recyclerView.setAdapter(myAdapter);
-
-        checkTasksExistence();
-
-
     }
 
+
     private void checkTasksExistence() {
-        DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference()
-                .child("users")
-                .child(mAuth.getCurrentUser().getUid())
-                .child("todo");
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference()
+                    .child("users")
+                    .child(user.getUid())
+                    .child("todo");
 
-        databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    noTasksImageView.setVisibility(View.GONE);
-                } else {
-                    noTasksImageView.setVisibility(View.VISIBLE);
+            databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        noTasksImageView.setVisibility(View.GONE);
+                    } else {
+                        noTasksImageView.setVisibility(View.VISIBLE);
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("checkTasksExistence", "DatabaseError: " + databaseError.getMessage());
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e("checkTasksExistence", "DatabaseError: " + databaseError.getMessage());
+                }
+            });
+        } else {
+            // User is not authenticated, handle this case as needed
+            Log.e("checkTasksExistence", "User is not authenticated");
+        }
     }
 
     private void createNotificationChannel() {
@@ -352,22 +355,6 @@ public class Home extends AppCompatActivity {
         });
     }
 
-    protected void onStart() {
-        super.onStart();
-        myAdapter.startListening();
-        checkTasksExistence(); // Update visibility when the activity starts
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        myAdapter.stopListening();
-    }
-    @Override
-    protected void onPause() {
-        super.onPause();
-        checkTasksExistence();
-    }
 
     public void addData(View view) {
 
@@ -451,8 +438,7 @@ public class Home extends AppCompatActivity {
                 newData.put("time", tasktimetxt);
                 newData.put("taskstatus", "Pending");
 
-                String uniqueKey = FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo").push().getKey();
-                ;
+                String uniqueKey = FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo").push().getKey();;
 
                 FirebaseDatabase.getInstance().getReference().child("users").child(mAuth.getCurrentUser().getUid()).child("todo").child(uniqueKey).setValue(newData)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -536,7 +522,17 @@ public class Home extends AppCompatActivity {
         popupMenu.show();
     }
 
+    protected void onStart() {
+        super.onStart();
+        myAdapter.startListening();
+        checkTasksExistence(); // Update visibility when the activity starts
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        myAdapter.stopListening();
+    }
     public void onBackPressed() {
         // Check if DialogPlus is showing and dismiss it
         if (dialogPlus != null && dialogPlus.isShowing()) {
