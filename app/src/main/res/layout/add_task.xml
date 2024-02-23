@@ -102,7 +102,9 @@
                 android:hint="Enter Task Date"
                 android:inputType="text"
                 android:textColor="@color/black"
-                android:textColorHint="@color/black" />
+                android:textColorHint="@color/black"
+                android:focusable="false"
+                android:focusableInTouchMode="false" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -124,7 +126,9 @@
                 android:hint="Enter Task Time"
                 android:inputType="text"
                 android:textColor="@color/black"
-                android:textColorHint="@color/black" />
+                android:textColorHint="@color/black"
+                android:focusable="false"
+                android:focusableInTouchMode="false"/>
 
             <Button
                 android:id="@+id/addtask"

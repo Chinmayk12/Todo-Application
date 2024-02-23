@@ -72,7 +72,6 @@ import pl.droidsonroids.gif.GifImageView;
 
 public class Home extends AppCompatActivity {
     DialogPlus dialogPlus;
-
     public void logoutUser(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
         builder.setTitle("Logout");
@@ -148,7 +147,7 @@ public class Home extends AppCompatActivity {
         setContentView(R.layout.home_page);
 
         mAuth = FirebaseAuth.getInstance();
-        Toast.makeText(getApplicationContext(), "UID:" + mAuth.getCurrentUser().getUid(), Toast.LENGTH_SHORT).show();
+       //Toast.makeText(getApplicationContext(), "UID:" + mAuth.getCurrentUser().getUid(), Toast.LENGTH_SHORT).show();
 
         username = (TextView) findViewById(R.id.hello);
         noTasksImageView = findViewById(R.id.noTasksImageView);

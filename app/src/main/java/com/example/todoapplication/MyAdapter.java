@@ -421,8 +421,6 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         dialogPlus.show();
     }
 
-
-
     private void updateAlarmForTask(View view, String date, String time, String todoid, String title, String description) {
         try {
             // Combine date and time strings to create a DateTime object
@@ -458,25 +456,28 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         }
     }
 
-    private void cancelAlarmForTask(Context context, String todoid, String oldTime) {
+    private void cancelAlarmForTask(Context context, String todoid, String oldDateTimeString) {
+
         // Convert the old time string to milliseconds
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         try {
-            Date oldDateTime = format.parse(oldTime);
+            Date oldDateTime = format.parse(oldDateTimeString);
             long oldTimeMillis = oldDateTime.getTime();
+
+            //Toast.makeText(getApplicationContext(),"2.Cancel Alarm Method Called",Toast.LENGTH_SHORT).show();
 
             Log.d("CancelAlarmForTask", "Old time in milliseconds: " + oldTimeMillis);
 
             // Create an intent for the alarm receiver
             Intent intent = new Intent(context, MyReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
             Log.d("CancelAlarmForTask", "PendingIntent created");
 
             // Get the AlarmManager service and cancel the pending intent
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             if (alarmManager != null) {
-                Toast.makeText(context,"Alarm Cancelled",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context,"Alarm Cancelled",Toast.LENGTH_SHORT).show();
                 alarmManager.cancel(pendingIntent);
                 Log.d("CancelAlarmForTask", "Alarm cancelled");
             }
@@ -486,11 +487,13 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
             }
         } catch (ParseException e) {
             e.printStackTrace();
-            Log.e("CancelAlarmForTask", "Error parsing old time: " + oldTime);
+            Log.e("CancelAlarmForTask", "Error parsing old time: " + e.getMessage());
         }
     }
 
     private void deleteTodo(View view, String itemId) {
+
+        final String[] deleteOldTime = new String[1];
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
@@ -507,19 +510,18 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.exists()) {
                             Model model = snapshot.getValue(Model.class);
-                             String oldTime = model.getTime();
-
+                            String oldTime = model.getTime();
+                            String date = model.getFullDate();
+                            String datetimestring  = date + " " + oldTime;
 
                             todoRef.removeValue()
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void aVoid) {
-                                            Toast.makeText(view.getContext(), "Todo deleted successfully", Toast.LENGTH_SHORT).show();
-                                            Toast.makeText(view.getContext(), oldTime,Toast.LENGTH_SHORT).show();
-                                            cancelAlarmForTask(view.getContext(), itemId, oldTime);
+                                            Toast.makeText(view.getContext(), "Task deleted successfully", Toast.LENGTH_SHORT).show();
+                                            cancelAlarmForTask(view.getContext(), itemId, datetimestring);
                                             checkTasksExistence();
                                         }
-
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
@@ -532,7 +534,6 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                             Toast.makeText(view.getContext(), "Todo not found", Toast.LENGTH_SHORT).show();
                         }
                     }
-
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
                         Log.e("MyAdapter", "Error reading todo", error.toException());
