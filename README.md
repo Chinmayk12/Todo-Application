@@ -24,40 +24,7 @@ Overall, the Todo app project aims to provide users with a comprehensive and int
 3) Database : Realtime Firebase 
 
 # Firebase Database Json Object File : 
-[Uploading Database Json Object{
-  "users": {
-    "15qi5crURVTNPaI02fEbVquIX9r1": {
-      "todo": {
-        "-NrqP4E5nDufRUR367Vo": {
-          "date": "1/3/2024",
-          "taskdesc": "Authentication",
-          "taskstatus": "Done",
-          "tasktitle": "Android ",
-          "time": "03:17"
-        },
-        "-NrqPIt9kVJKMP6exU_B": {
-          "date": "3/3/2024",
-          "taskdesc": "OS",
-          "taskstatus": "Ongoing",
-          "tasktitle": "Assignment",
-          "time": "03:15"
-        },
-        "-NrqPUse27qneQETOsID": {
-          "date": "5/3/2024",
-          "taskdesc": "Chest",
-          "taskstatus": "Pending",
-          "tasktitle": "Gym",
-          "time": "03:19"
-        }
-      },
-      "userinfo": {
-        "email": "karodpatichinmay12@gmail.com",
-        "username": "Chinmay karodpati"
-      }
-    }
-  }
-} File.json…]()
-
+https://shorturl.at/nuIO6
 
 # Screenshots Of App :
 ![1](https://github.com/Chinmayk12/Todo-Application/assets/137162238/d079a11a-0efb-4279-8323-bfb2ecdd35d4)
