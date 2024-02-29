@@ -19,4 +19,24 @@ The Todo app project aims to create a user-friendly task management application 
 Overall, the Todo app project aims to provide users with a comprehensive and intuitive task management solution that enhances productivity and organization.
 
 # Technologies Used :
+1) UI :- XML , Material Design
+2) Backend :- Java
+3) Database : Realtime Firebase
+
+# Screenshots Of App :
+1) ![1](https://github.com/Chinmayk12/Todo-Application/assets/137162238/d079a11a-0efb-4279-8323-bfb2ecdd35d4)
+2) ![2](https://github.com/Chinmayk12/Todo-Application/assets/137162238/5317a56b-9025-4dde-8be8-94a2f050f102)
+3)
+
+
+
+
+
+
+
+
+
+
+
+
 
