@@ -18,4 +18,5 @@ The Todo app project aims to create a user-friendly task management application 
 
 Overall, the Todo app project aims to provide users with a comprehensive and intuitive task management solution that enhances productivity and organization.
 
+# Technologies Used :
 
