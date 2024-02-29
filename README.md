@@ -17,3 +17,5 @@ The Todo app project aims to create a user-friendly task management application 
 7)AdMob Integration: Includes interstitial ads for monetization, offering a potential revenue stream for the app.
 
 Overall, the Todo app project aims to provide users with a comprehensive and intuitive task management solution that enhances productivity and organization.
+
+
