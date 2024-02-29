@@ -1,4 +1,4 @@
-[Database Json Object File.json](https://github.com/Chinmayk12/Todo-Application/files/14453094/Database.Json.Object.File.json)# Todo App - Android
+# Todo App - Android
 
 The Todo app project aims to create a user-friendly task management application for Android devices. It offers the following key features:
 
