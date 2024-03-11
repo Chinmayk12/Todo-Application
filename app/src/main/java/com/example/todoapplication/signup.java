@@ -27,7 +27,7 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 
 public class signup extends AppCompatActivity {
 
-    EditText email,password,username;
+    EditText email, password, username;
     Button signup;
     TextView aldlogin;
     private FirebaseAuth mAuth;
@@ -61,22 +61,17 @@ public class signup extends AppCompatActivity {
         signup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String emailtxt, passwordtxt,usernametxt;
+                String emailtxt, passwordtxt, usernametxt;
 
                 emailtxt = email.getText().toString();
                 passwordtxt = password.getText().toString();
                 usernametxt = username.getText().toString();
 
-                if((emailtxt.isEmpty() && passwordtxt.isEmpty()) || (emailtxt.isEmpty() || passwordtxt.isEmpty()) || (usernametxt.isEmpty() || usernametxt.isEmpty()))
-                {
+                if ((emailtxt.isEmpty() && passwordtxt.isEmpty()) || (emailtxt.isEmpty() || passwordtxt.isEmpty()) || (usernametxt.isEmpty() || usernametxt.isEmpty())) {
                     Toast.makeText(getApplicationContext(), "Empty Field.", Toast.LENGTH_SHORT).show();
-                }
-                else if (passwordtxt.length() < 6) {
+                } else if (passwordtxt.length() < 6) {
                     Toast.makeText(getApplicationContext(), "Password must be at least 6 characters long.", Toast.LENGTH_SHORT).show();
-                }
-                else
-                {
-
+                } else {
                     Task<AuthResult> authResultTask = mAuth.createUserWithEmailAndPassword(emailtxt, passwordtxt)
                             .addOnCompleteListener(signup.this, new OnCompleteListener<AuthResult>() {
                                 @Override
@@ -133,7 +128,7 @@ public class signup extends AppCompatActivity {
 
     private void startHomeActivity() {
         //Intent intent = new Intent(getApplicationContext(), Home.class);
-        startActivity(new Intent(getApplicationContext(),Home.class));
+        startActivity(new Intent(getApplicationContext(), Home.class));
         finishAffinity(); // Finish the current activity to prevent going back to the login screen
     }
 

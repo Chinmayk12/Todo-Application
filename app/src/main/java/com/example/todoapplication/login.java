@@ -85,6 +85,7 @@ public class login extends AppCompatActivity {
 
     }
 
+    // Email Login
     public void emailLogin(View view) {
         String emailtxt = email.getText().toString().trim();
         String passwordtxt = password.getText().toString().trim();

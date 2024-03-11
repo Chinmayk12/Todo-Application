@@ -401,7 +401,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
-                                Toast.makeText(view.getContext(),oldTime[0],Toast.LENGTH_SHORT).show();
+                                //makeText(view.getContext(),oldTime[0],Toast.LENGTH_SHORT).show();
                                 cancelAlarmForTask(getApplicationContext(), todoid, oldTime[0]);
                                 updateAlarmForTask(view, datetxt, tasktimetxt, todoid, tasktitletxt, taskdesctxt);
                                 Toast.makeText(view.getContext(), "Data Updated", Toast.LENGTH_SHORT).show();
@@ -449,7 +449,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
             }
 
             // Display a message to indicate that the alarm has been set
-            Toast.makeText(view.getContext(), "Alarm set for task: " + title, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(view.getContext(), "Alarm set for task: " + title, Toast.LENGTH_SHORT).show();
 
         } catch (ParseException e) {
             e.printStackTrace();

@@ -71,7 +71,6 @@ import java.util.Map;
 import pl.droidsonroids.gif.GifImageView;
 
 public class Home extends AppCompatActivity {
-    DialogPlus dialogPlus;
 
     // Added This Class For Inconsistency Error Resolving Which I Was Getting When I Goes To Allow Notification For App
     public class WrapContentLinearLayoutManager extends LinearLayoutManager {
@@ -98,6 +97,7 @@ public class Home extends AppCompatActivity {
         }
     }
 
+    DialogPlus dialogPlus;
     private static final String CHANNEL_ID = "My Channel";
     TextView  username;
     private FirebaseAuth mAuth;
@@ -170,8 +170,6 @@ public class Home extends AppCompatActivity {
         */
 
     }
-
-
     private void checkTasksExistence() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
@@ -200,7 +198,6 @@ public class Home extends AppCompatActivity {
             Log.e("checkTasksExistence", "User is not authenticated");
         }
     }
-
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Todo App";
@@ -214,7 +211,6 @@ public class Home extends AppCompatActivity {
 
         }
     }
-
     private boolean isNotificationPermissionGranted() {
         // Check if notification permission is granted
         return NotificationManagerCompat.from(this).areNotificationsEnabled();
@@ -460,7 +456,7 @@ public class Home extends AppCompatActivity {
             }
 
             // Display a message to indicate that the alarm has been set
-            Toast.makeText(getApplicationContext(), "Alarm set for task: " + title, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "Alarm set for task: " + title, Toast.LENGTH_SHORT).show();
 
         } catch (ParseException e) {
             e.printStackTrace();
