@@ -421,6 +421,7 @@ public class MyAdapter extends FirebaseRecyclerAdapter<Model, MyAdapter.myViewHo
         dialogPlus.show();
     }
 
+    @SuppressLint("ScheduleExactAlarm")
     private void updateAlarmForTask(View view, String date, String time, String todoid, String title, String description) {
         try {
             // Combine date and time strings to create a DateTime object
