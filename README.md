@@ -1,6 +1,6 @@
 # TaskMate- Android
 
-The Todo app project aims to create a user-friendly task management application for Android devices. It offers the following key features:
+The TaskMate app project aims to create a user-friendly task management application for Android devices. It offers the following key features:
 
 1)Create Todos: Users can easily add new tasks to their list with a title, description, and due date, providing a clear overview of their upcoming tasks.
 
